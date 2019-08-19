@@ -22,7 +22,6 @@
                   <p>Modal body text goes here.</p>
                 </div>
                 <div class="modal-footer">
-                  <!--<button type="button" class="btn btn-primary">Save changes</button>-->
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
@@ -61,7 +60,6 @@
             });
 
 
-
             function createBoard() {
                 $('#board-form').on('submit', function(e){
                 console.log('submit');
@@ -71,25 +69,58 @@
                     url: $(this).attr('action'),
                     data: $(this).serialize(),
                     method: 'POST'
-                }).done(function(res){
-                    //$('board').html(res)
+                }).done(function(data){
                     $('#modal').modal('hide');
-                    window.location('http://127.0.0.1:8000/board/')
+                    window.location.href = '/board/'+data.title;
                 }).fail(function(err){
                     alert(err)
-
+                    console.log(error)
                 })
             });
 
             }
+        }
 
-            $('#desbtn').click(function(){
-                alert("Create Board!")
+
+        function addList(){
+            $('#list-form').on('click', function(){
+                console.log("GET2.....");
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'get',
+                }).done(function(response){
+                    console.log("GET.....");
+                    createList();
+                })
+            });
+        }
+
+        function createList(){
+            $('#list-form').on('submit', function(e){
+                console.log('submit formlist');
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    method: 'POST'
+                }).done(function(data){
+                    var list_template = `
+                        <div class='ltitle'>
+                        <h3>${ data.list_title }</h3>
+                        </div>
+                    `
+                    $("#list-container").append(list_template);
+                }).fail(function(err){
+                    alert(err)
+                    console.log(error)
+                })
             });
         }
 
         $(document).ready(function (){
-            add_board()
+            add_board();
+            addList();
         });
     </script>
 </html>

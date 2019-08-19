@@ -47,7 +47,7 @@ class AddBoardTitleForm(forms.ModelForm):
 
 
 class AddListForm(forms.ModelForm):
-    list_title = forms.CharField()
+    list_title = forms.CharField(initial='')
 
     class Meta:
         model = List 

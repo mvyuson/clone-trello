@@ -1,5 +1,5 @@
 <form id="board-form" method="POST" action="{% url 'board-create' %}" novalidate>
-        {% csrf_token %}
+    {% csrf_token %}
     {{form.as_p}}
     <button type="submit">Save</button>
 </form>
