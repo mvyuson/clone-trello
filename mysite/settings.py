@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+ROLEPERMISSIONS_REGISTER_ADMIN = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

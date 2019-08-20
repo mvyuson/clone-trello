@@ -17,7 +17,7 @@ from .forms import (
     AddBoardTitleForm, 
     AddListForm
 )
-from .models import Board
+from .models import List, Board
 
 import json
 
@@ -117,8 +117,8 @@ class CreateBoardView(TemplateView):
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
         if form.is_valid():
-            title = form.save()
-            title.created_date = timezone.now()
+            title = form.save(commit=False)
+            title.author = self.request.user
             title.save()
             title = self.request.POST.get('title')
             return HttpResponse(json.dumps({'title':title}), content_type="application/json")
@@ -128,6 +128,8 @@ class CreateBoardView(TemplateView):
 class BoardView(RedirectView):
     """
     Display the current board title by calling its id
+
+    Get the current Board
     """
 
     template_name = 'trello/board.html'
@@ -145,39 +147,9 @@ class BoardView(RedirectView):
         title = current_board.title
         if form.is_valid():
             list_title = form.save()
-            form = self.form()
+            list_title = self.request.POST.get('list_title')
+            return HttpResponse(json.dumps({'list_title':list_title}), content_type="application/json")
+            
         return render(self.request, self.template_name, {'title':title, 'form':form})
 
 
-class CreateListView(TemplateView):
-    template_name = 'trello/board.html'
-    
-
-    def get(self, *args, **kwargs):
-        form = self.form()
-        return redirect(self.request.META['HTTP_REFERER'], {'form':form})
-
-    def post(self, *args, **kwargs):
-        form = self.form(self.request.POST)
-        if form.is_valid():
-            list_title = form.save()
-            
-            
-        return render(self.request, self.template_name, {'form':form})
-
-
-class PasswordResetView(TemplateView):
-    def get(self, *args, **kwargs):
-        email = self.request.POST.get('email')
-        send_mail(
-            'Reset Password',
-            'Reset Password',
-            'webmaster@localhost',
-            email,
-            html_content = render_to_string('registration/password_reset_email.html')
-        )
-
-
-    
-    
-        

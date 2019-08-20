@@ -52,5 +52,3 @@ class AddListForm(forms.ModelForm):
     class Meta:
         model = List 
         fields = ('list_title',)
-    
-

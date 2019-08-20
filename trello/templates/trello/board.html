@@ -1,6 +1,7 @@
 {% extends 'trello/dashboard.html' %}
 {% block content %}
     <div class="container-fluid" id="board_container">{{ title.title }}</div>
+    <h5>{{ user.username }}</h5>
     <header>
         <div class="container-fluid d-flex flex-wrap w-100" id="form-container">
             <form id="list-form" method="POST" class="post-form" action="{% url 'board' title=title %}">{% csrf_token %}
