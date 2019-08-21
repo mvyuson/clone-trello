@@ -115,8 +115,7 @@ class CreateBoardView(TemplateView):
             board.author = self.request.user
             board.save()
             print(board.id)
-            return JsonResponse({'board.id':'board.id'})
-            print(JsonResponse({'board.id':'board.id'}))
+            return JsonResponse({'board':board.id})
         return render(self.request, self.template_name,  {'form':form})
  
 
