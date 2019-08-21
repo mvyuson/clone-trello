@@ -30,9 +30,9 @@ function add_board(){
             method: 'POST'
         }).done(function(data){
             $('#modal').modal('hide');
+            window.location.href = '/board/'+data.id;     //undefine id
         }).fail(function(err){
             alert(err)
-            console.log(error)
         })
     });
 

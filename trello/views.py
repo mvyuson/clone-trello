@@ -107,12 +107,16 @@ class CreateBoardView(TemplateView):
     def post(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
         form = self.form(self.request.POST)
+        """
+        Undefine board_id
+        """
         if form.is_valid():
             board = form.save(commit=False)
             board.author = self.request.user
             board.save()
             print(board.id)
-            return redirect('board', board.id)
+            return JsonResponse({'board.id':'board.id'})
+            print(JsonResponse({'board.id':'board.id'}))
         return render(self.request, self.template_name,  {'form':form})
  
 
