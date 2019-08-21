@@ -30,7 +30,7 @@ function add_board(){
             method: 'POST'
         }).done(function(data){
             $('#modal').modal('hide');
-            window.location.href = '/board/'+data.board;     //undefine id
+            window.location.href = '/board/'+data.board;  
             console.log(data)
         }).fail(function(err){
             alert(err)

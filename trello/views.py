@@ -138,9 +138,6 @@ class ListView(TemplateView):
     template_name = 'trello/board.html'
 
     def get(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        #current_list = get_object_or_404(List, list_title=kwargs.get("list_title"))
-        #current_list = List.objects.filter(list_title='list_title').last()
         current_list = List.objects.latest('list_title')
         print(current_list)
         return render(self.request, self.template_name, {'current_list':current_list})
