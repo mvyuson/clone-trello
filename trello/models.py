@@ -6,13 +6,22 @@ from django.db import models
 from datetime import datetime
 
 
+class Card(models.Model):
+    board_list = models.ForeignKey('List', on_delete=models.CASCADE)
+    card_title = models.CharField(max_length=200)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.card_title
+
+
 class List(models.Model):
     """
     Dapat niya tawagon ang pangalan sa board member na naghimo sa list
     """
 
     board = models.ForeignKey('Board', on_delete=models.CASCADE) #one to many queryset view
-    boardmember = models.ForeignKey('BoardMembers', on_delete=models.CASCADE)
     list_title = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -28,7 +37,7 @@ class Board(models.Model):
     Automatically update value to 'updated_date' when save method is called.
     """
 
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) #boardmember na instance, iassign ang value ani gamit ang queryset. 
+    author = models.ForeignKey(User, on_delete=models.CASCADE) #boardmember na instance, iassign ang value ani gamit ang queryset. 
     title = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True, editable=True)
@@ -39,12 +48,12 @@ class Board(models.Model):
 
 class BoardMembers(models.Model):
     """
-    Create board members to the specific board, with its members, and their ownership status.
-    If member is the board author, then owner is equals to True.
+    Kwaa ang board.
+    Kwaa ang nagcreate sa board tapos ibutang kay members.
     """
 
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
-    members = models.CharField(max_length=200) #author sa board
+    members = models.ForeignKey(User, on_delete=models.CASCADE) #author sa board
     deactivate = models.BooleanField(default=True)
     owner = models.BooleanField(default=False)
 

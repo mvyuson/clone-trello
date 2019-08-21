@@ -1,15 +1,12 @@
-{% extends 'trello/dashboard.html' %}
+{% extends 'trello/base.html' %}
 {% block content %}
-    <div class="container-fluid" id="board_container">{{ title.title }}</div>
-    <h5>{{ user.username }}</h5>
+    <div class="container-fluid" id="board_container">{{ board.title }}</div>
     <header>
         <div class="container-fluid d-flex flex-wrap w-100" id="form-container">
-            <form id="list-form" method="POST" class="post-form" action="{% url 'board' title=title %}">{% csrf_token %}
-                {{ form.as_p }}
-            </form>
+            {{ context.board }}
         </div>
-        <div class="bg-dark h-100" id="list-container" >
-
+        <div class="container bg-dark" id="list-container" >
+            {{ current_list.list_title }}
         </div>
     </header>
 {% endblock %}

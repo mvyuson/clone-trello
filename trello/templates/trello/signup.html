@@ -1,11 +1,36 @@
+{% load static %}
 <html>
     <head>
+        <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}">
+        <title>Trello Signup</title>
     </head>
     <body>
-        <form method="POST">{% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" type="submit">Sign Up</button>
-        </form>
-        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        <div class="container w-25 mt-5">
+            <form method="POST" novalidate> 
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="form.username.label">{{ form.username.label }}</label>
+                    {{ form.username}}
+                    {{ form.username.errors}}
+                </div>
+                <div class="form-group">
+                    <label for="form.email.label">{{ form.email.label }}</label>
+                    {{ form.email}}
+                    {{ form.email.errors}}
+                </div>
+                <div class="form-group">
+                    <label for="form.password.label">{{ form.first_password.label }}</label>
+                    {{ form.first_password }}
+                    {{ form.first_password.errors}}
+                </div>
+                <div class="form-group">
+                    <label for="form.password.label">{{ form.second_password.label }}</label>
+                    {{ form.second_password }}
+                    {{ form.second_password.errors}}
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+                <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+            </form>
+        </div>
     </body>
 </html>

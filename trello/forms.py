@@ -3,10 +3,10 @@ from .models import Board, List
 from django.contrib.auth.models import User
 
 class SignupForm(forms.Form):
-    username = forms.CharField(max_length=30)
-    email = forms.CharField(max_length=30)
-    first_password = forms.CharField(widget=forms.PasswordInput)
-    second_password = forms.CharField(widget=forms.PasswordInput)
+    username = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.CharField(max_length=30, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    first_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    second_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     
     def clean_email(self):
@@ -34,13 +34,11 @@ class SignupForm(forms.Form):
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 
 class AddBoardTitleForm(forms.ModelForm):
-    title = forms.CharField()
-
     class Meta:
         model = Board
         fields = ('title',)

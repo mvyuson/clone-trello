@@ -83,23 +83,13 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
     Redirect to Login page when user logout.
     """
     login_url = '/login/'
-    template_name = 'trello/dashboard.html'
+    template_name = 'trello/list.html'
     form = AddBoardTitleForm
 
     def get(self, *args, **kwargs):
-        form = AddBoardTitleForm()
-        context = {'form':form}
-        return render(self.request, self.template_name, context)
-
-    def post(self, *args, **kwargs):
-        form = self.form(self.request.POST)
-        title = self.request.POST.get('title')
-        context = {'form':form}
-        if form.is_valid():
-            title = form.save()
-            return redirect('board', title=title)
-        return render(self.request, self.template_name, context)
-
+        board = Board.objects.filter(author=self.request.user).order_by('id')
+        return render(self.request, self.template_name, {'board':board})
+ 
 
 class CreateBoardView(TemplateView):
     """
@@ -115,17 +105,18 @@ class CreateBoardView(TemplateView):
         return render(self.request, self.template_name,  {'form':form})
 
     def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         form = self.form(self.request.POST)
         if form.is_valid():
-            title = form.save(commit=False)
-            title.author = self.request.user
-            title.save()
-            title = self.request.POST.get('title')
-            return HttpResponse(json.dumps({'title':title}), content_type="application/json")
+            board = form.save(commit=False)
+            board.author = self.request.user
+            board.save()
+            print(board.id)
+            return redirect('board', board.id)
         return render(self.request, self.template_name,  {'form':form})
  
 
-class BoardView(RedirectView):
+class BoardView(TemplateView):
     """
     Display the current board title by calling its id
 
@@ -133,23 +124,46 @@ class BoardView(RedirectView):
     """
 
     template_name = 'trello/board.html'
-    form = AddListForm
 
     def get(self, *args, **kwargs):
-        current_board = get_object_or_404(Board, title=kwargs.get("title"))
-        title = current_board.title
-        form = self.form()
-        return render(self.request, self.template_name, {'title':title, 'form':form})
+        board = get_object_or_404(Board, id=kwargs.get("id"))
+        context = {'board':board.id}
+        return render(self.request, self.template_name, context)
+
+
+class ListView(TemplateView):
+    template_name = 'trello/board.html'
+
+    def get(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        #current_list = get_object_or_404(List, list_title=kwargs.get("list_title"))
+        #current_list = List.objects.filter(list_title='list_title').last()
+        current_list = List.objects.latest('list_title')
+        print(current_list)
+        return render(self.request, self.template_name, {'current_list':current_list})
+
+class BoardListView(TemplateView):
+    template_name = 'trello/base.html'
 
     def post(self, *args, **kwargs):
-        form = self.form(self.request.POST)
-        current_board = get_object_or_404(Board, title=kwargs.get("title"))
-        title = current_board.title
+        all_boards = Board.objects.all(title='title')
+        context = {'all_boards':all_boards}
+        return render(self.request, self.template_name, context)
+
+
+class UpdateListView(TemplateView):
+    template_name = 'trello/create-list.html'
+
+    def get(self, *args, **kwargs):
+        post = get_object_or_404(List, pk=kwargs.get("pk"))
+        form = AddListForm(instance=post)
+        return render(self.request, self.template_name, {'form':form})
+
+    def post(self, *args, **kwargs):
+        post = get_object_or_404(List, pk=kwargs.get("pk"))
+        form = AddListForm(self.request.POST, instance=post)
         if form.is_valid():
-            list_title = form.save()
-            list_title = self.request.POST.get('list_title')
-            return HttpResponse(json.dumps({'list_title':list_title}), content_type="application/json")
-            
-        return render(self.request, self.template_name, {'title':title, 'form':form})
-
-
+            post = form.save(commit=False)
+            current_board = get_object_or_404(Board, title=kwargs.get("title"))
+            post.board = current_board
+            post.save()
