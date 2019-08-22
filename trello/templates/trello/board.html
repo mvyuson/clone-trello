@@ -1,12 +1,19 @@
 {% extends 'trello/base.html' %}
 {% block content %}
+    <a href="{% url 'dashboard' %}">Back</a>
     <div class="container-fluid" id="board_container">{{ board.title }}</div>
     <header>
-        <div class="container-fluid d-flex flex-wrap w-100" id="form-container">
-            {{ context.board }}
-        </div>
-        <div class="container bg-dark" id="list-container" >
-            {{ current_list.list_title }}
-        </div>
+        <form id="list-form" action="{% url 'board' id=board.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="form.list.label">{{ form.list_title.label }}</label>
+                {{ form.list_title}}
+                {{ form.list_title.errors}}
+            </div>
+        </form>
     </header>
+    <body>
+        <!--<div class="container" id="list-container"><p>No List</p></div>-->
+        {% include 'trello/create-list.html' %}
+    </body>
 {% endblock %}
