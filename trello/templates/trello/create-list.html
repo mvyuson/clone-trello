@@ -1,3 +1,12 @@
-<div class="card bg-warning">
-    {{ current_list.list_title }}
-</div>
+<ul class="list-unstyled ml-3">
+    <li>
+        {% for l in board_list %}
+            <div class="card bg-warning text-white">
+                <h5 id="b-list">{{ l.list_title  }}</h5>
+                <button class="close float-right">x</button>
+            </div> 
+        {% endfor %}
+    </li>
+</ul>
+
+
