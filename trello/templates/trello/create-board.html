@@ -1,6 +1,6 @@
 <form id="board-form" method="POST" action="{% url 'board-create' %}" novalidate>
+    <span class="error" style="display:none;">This field is required.</span>
     {% csrf_token %}
     {{form.as_p}}
     <button type="submit">Save</button>
 </form>
-
