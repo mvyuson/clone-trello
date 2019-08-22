@@ -107,15 +107,14 @@ class CreateBoardView(TemplateView):
     def post(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
         form = self.form(self.request.POST)
-        """
-        Undefine board_id
-        """
         if form.is_valid():
             board = form.save(commit=False)
             board.author = self.request.user
             board.save()
             print(board.id)
-            return JsonResponse({'board':board.id})
+            return JsonResponse({'board':board.id})    
+        else:
+            return HttpResponse(status=400)
         return render(self.request, self.template_name,  {'form':form})
  
 
@@ -127,14 +126,40 @@ class BoardView(TemplateView):
     """
 
     template_name = 'trello/board.html'
+    form = AddListForm
 
     def get(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         board = get_object_or_404(Board, id=kwargs.get("id"))
-        context = {'board':board.id}
+        form = self.form()
+        #board = board.id
+        context = {'board':board, 'form':form}
         return render(self.request, self.template_name, context)
+
+    def post(self, *args, **kwargs):
+        form = self.form(self.request.POST)
+        if form.is_valid():
+            board_list = form.save(commit=False)
+            board_list.board = get_object_or_404(Board, id=kwargs.get("id"))
+            board = board_list.board
+            board_list.save()
+            return JsonResponse({'board_list':board_list.list_title})
+        return render(self.request, self.template_name, {'form':form})
+        
 
 
 class ListView(TemplateView):
+    template_name = 'trello/create-list.html'
+    form = AddListForm
+
+    def get(self, *args, **kwargs):
+        board_list = List.objects.order_by("id")
+        context = {'board_list':board_list}
+        print(board_list)
+        return render(self.request, self.template_name, context)
+
+
+"""class ListView(TemplateView):
     template_name = 'trello/board.html'
 
     def get(self, *args, **kwargs):
@@ -166,4 +191,4 @@ class UpdateListView(TemplateView):
             post = form.save(commit=False)
             current_board = get_object_or_404(Board, title=kwargs.get("title"))
             post.board = current_board
-            post.save()
+            post.save()"""
