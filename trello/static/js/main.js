@@ -17,97 +17,60 @@ function add_board(){
             createBoard();
         });
     });
-
-
-    function createBoard() {
-        $('#board-form').on('submit', function(e){
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                method: 'POST'
-            }).done(function(data){
-                $('#modal').modal('hide');
-                window.location.href = '/board/'+data.board;  
-            }).fail(function(xhr, data){
-                $('.error').show();
-            });        
-        });
-
-    }
 }
 
-function clist(){
-    $.ajax({
-        method: 'get',
-        url: '/board/'
-    }).done(function(response){
-        vlist();
-        console.log('HA');
-    });
-}
-
-function vlist(){
-    $('#list-form').on('submit', function(e){
-        console.log('submit list');
+function createBoard() {
+    $('#board-form').on('submit', function(e){
+        e.preventDefault();
         $.ajax({
             url: $(this).attr('action'),
             data: $(this).serialize(),
             method: 'POST'
         }).done(function(data){
-            console.log(data);
-            //window.location.href = '/create-list/';
-            $('#list-form').attr('');
-            //$("body").find('.container').html(data)
-            $("body").find('.container').append(data.board_list)
+            $('#modal').modal('hide');
+            window.location.href = '/board/'+data.board;  
         }).fail(function(xhr, data){
+            console.log("ffdfdf");
+            $('.error').show();
+        });        
+    });
+}
 
+function editBoard(){
+    $('#board_container').on('click', function(e){
+        console.log('Click');
+        var edit_board = $(this).attr('contenteditable', 'true');
+        $(this).attr('focus');
+
+        $('#board_container[contenteditable]').keypress(function(e){
+            if(event.keyCode == "13"){
+                $(edit_board).blur();
+                console.log('EDIT BOARD');
+            }
         });
+    });
+}
+
+function getBoard(){
+    board_id = $()
+    $.ajax({
+        url: '/board',
+        method: 'GET',
     })
 }
 
-function addList(){
-     $.ajax({
-         url: '/create-list/',
-         method: 'get',
-     }).done(function(response){
-         $("body").find('.container').html(response)
-         updateList();
-     })
-}
 
-
-// function updateList(){
-//     $('#b_list').click(function(e){
-//         var edit_list = $(this).attr('contenteditable', 'true');
-//         $(this).attr('focus');
-
-//         $('#b_list[contenteditable]').keypress(function(e){
-//             if(event.keyCode == "13"){
-//                 $(edit_list).blur();
-//                 console.log('HA')
-//             }
-//         });
-//     });
+// function addList(){
+//     console.log("LIST");
+//      $.ajax({
+//          url: '/create-list/',
+//          method: 'get',
+//      }).done(function(response){
+//          $("body").find('#list-container').html(response)
+//      })
 // }
-
-function updateList(){
-    $('h5').click(function(e){
-        var data = $('#b-list').val();
-        console.log(data);
-            var edit_list = $(this).attr('contenteditable', 'true');
-            $(this).attr('focus');
-        $.ajax({
-            url: '/create-list/',
-            method: 'get',
-        }).done(function(response){
-
-        })
-    })
-}
 
 $(document).ready(function (){
     add_board();
-    //addList();
-    //updateList();
+    editBoard();
 });
