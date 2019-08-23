@@ -37,7 +37,7 @@ class Board(models.Model):
     Automatically update value to 'updated_date' when save method is called.
     """
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE) #boardmember na instance, iassign ang value ani gamit ang queryset. 
+    author = models.ForeignKey(User, on_delete=models.CASCADE) 
     title = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True, editable=True)
