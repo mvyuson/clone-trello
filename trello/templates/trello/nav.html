@@ -1,5 +1,13 @@
 <div class="page-header bg-warning">
-    <h3 id="user">{{ user.username }}</h3>
-    <a href="{% url 'logout' %}">Logout</a>
+    <div class="btn-group dropright">
+        <button type="button" class="btn btn-lg text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ user.username }}
+        </button>
+        <div class="dropdown-menu h-100 p-2 mt-0">
+            {{ user.email }}
+        </div>
+    </div>
+    <a class="p-0 mr-3"id="logout" href="{% url 'logout' %}">Logout</a>
     <button class="btn" id="create-board"><span id='add-board'>Create Board</span></button>
 </div>
+
