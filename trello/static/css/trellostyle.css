@@ -1,0 +1,38 @@
+#add-board{
+    color: #ffffff;
+    font-size: 20px;
+}
+
+#create-board{
+    margin-left: 35%;
+    margin-top: -13px;
+    height: 30px;
+}
+
+.page-header{
+    height: 50px;
+}
+
+.page-header a{
+    color: #ffffff;
+    float: right;
+}
+
+
+#board_dropdown{
+    margin-top: -44px;
+    margin-left: 75%;
+}
+
+.modal{
+    width: 50%;
+}
+
+.card{
+    width: 220px;
+    font-size: 10px;
+}
+
+#logout{
+    margin-top: 10px;
+}
