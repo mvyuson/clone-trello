@@ -1,9 +1,9 @@
 {% extends 'trello/base.html' %}
 {% block content %}
     <a href="{% url 'dashboard' %}">Back</a>
-    <div class="container-fluid" id="board_container">{{ board.title }}</div>
+    <h3 class="ml-3 p-2 w-25" id="board_container" contenteditable="true">{{ board.title }}</h3>
     <header>
-        <form id="list-form" action="{% url 'board' id=board.id %}" method="POST">
+        <form id="list-form" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="form.list.label">{{ form.list_title.label }}</label>
@@ -13,7 +13,7 @@
         </form>
     </header>
     <body>
-        <!--<div class="container" id="list-container"><p>No List</p></div>-->
+        <!-- <div class="container" id="list-container"><p>No List</p></div> -->
         {% include 'trello/create-list.html' %}
     </body>
 {% endblock %}
