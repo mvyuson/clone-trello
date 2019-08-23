@@ -1,20 +1,19 @@
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from trello.views import (
-        SignupView, 
+        SignUpView, 
         LoginView,
         DashBoardView,
         LogoutView,
         BoardView,
         CreateBoardView,
         ListView,
-        #UpdateListView,
 )
 
 from django.urls import path
 
 urlpatterns = [
-    path('signup/', SignupView.as_view(), name='signup'),
+    path('signup/', SignUpView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('password_reset/', auth_views.password_reset, name='password_reset'),
     path('password_reset_done/', auth_views.password_reset_done, name='password_reset_done'),
@@ -27,5 +26,4 @@ urlpatterns = [
     path('board/<int:id>/', BoardView.as_view(), name='board'),
     path('create-board/', CreateBoardView.as_view(), name='board-create'),
     path('create-list/', ListView.as_view(), name='create-list')
-    #path('edit-list/<int:id>/', UpdateListView.as_view(), name='edit-list'),
 ]
