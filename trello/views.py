@@ -1,10 +1,10 @@
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import TemplateView, RedirectView, View
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .forms import (
-    SignupForm, 
+    SignUpForm, 
     LoginForm, 
     AddBoardTitleForm, 
     AddListForm
@@ -22,35 +22,63 @@ from .models import List, Board
 import json
 
 
-class SignupView(TemplateView):
-    form = SignupForm
+class SignUpView(TemplateView):
+    """
+    View for the signup.
+    """
+
+    form = SignUpForm
     template_name = 'trello/signup.html'
 
+    """
+    Render form to signup page.
+    """
+
     def get(self, *args, **kwargs):
-        form = SignupForm()
+        form = SignUpForm()
         context = {'form':form}
         return render(self.request, self.template_name, context)
 
+    """
+    If form is validated, the user will be redirected to login page.
+    If not, form will be rerendered.
+    """
+
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
-        #import pdb; pdb.set_trace()
         if form.is_valid():
             myuser = form.save()
-            myuser.save()
             return redirect('login')
         context = {'form':form}
         return render(self.request, self.template_name, context)
 
 
-
 class LoginView(TemplateView):
+    """
+    View for login.
+    """
+    
     form = LoginForm
     template_name = 'trello/login.html'
+    #import pdb; pdb.set_trace()
+
+    """
+    Render login form to login page.
+    """
     
     def get(self, *args, **kwargs):
         form = LoginForm()
         context = {'form':form}
         return render(self.request, self.template_name, context)
+
+    """
+    Assign username and password with the values retrieved from form.
+    If form is valid after validating, django will authenticate user
+    by comparing the data entered vs data registered in the database.
+    If user credentials have a matching values from the database, the 
+    user will turn as active and will be redirected to the dashboard.
+    Else the method will rerender the form.
+    """
 
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
@@ -63,7 +91,6 @@ class LoginView(TemplateView):
                 login(self.request, user)
                 return redirect('dashboard') 
             else:
-                print("Check username and password")
                 return render(self.request, self.template_name, context)
         return render(self.request, self.template_name, context)
 
@@ -80,8 +107,10 @@ class LogoutView(RedirectView):
 
 class DashBoardView(LoginRequiredMixin, TemplateView):
     """
-    Redirect to Login page when user logout.
+    Display all the boards made by the user.
+    Render Add Board form.
     """
+    
     login_url = '/login/'
     template_name = 'trello/list.html'
     form = AddBoardTitleForm
@@ -93,8 +122,8 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
 
 class CreateBoardView(TemplateView):
     """
+    When 'Create Board' is clicked, add board form will render.
     Redirect to board with the saved board title.
-    Dapat iinclude niya ang whitespace
     """
 
     template_name = 'trello/create-board.html' 
@@ -104,14 +133,30 @@ class CreateBoardView(TemplateView):
         form = self.form()
         return render(self.request, self.template_name,  {'form':form})
 
+    """
+    If form is valid, form.save(commit=False). 
+    It indicates that don't save the form yet
+    because the author of the board which
+    is the current user of the page was 
+    have not been set yet.
+    After the board author has been assigned,
+    the form will be save.
+    Then return a JsonResponse with board as
+    argument.
+
+    If form is not valid, this view will return
+    an error 400 which indicates that the server
+    can't process sent by the user may be due to 
+    invalid syntax or attempting on submitting the
+    form with empty values.
+    """
+
     def post(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         form = self.form(self.request.POST)
         if form.is_valid():
             board = form.save(commit=False)
             board.author = self.request.user
             board.save()
-            print(board.id)
             return JsonResponse({'board':board.id})    
         else:
             return HttpResponse(status=400)
@@ -143,10 +188,13 @@ class BoardView(TemplateView):
             board_list.board = get_object_or_404(Board, id=kwargs.get("id"))
             board = board_list.board
             board_list.save()
-            return JsonResponse({'board_list':board_list.list_title})
+            board_list = List.objects.filter(board=board).order_by('id') 
+            form = AddListForm()
+            context = {'board':board, 'board_list':board_list, 'form':form}
+            #return render(self.request, self.template_name, context)
+            return redirect('board', id=board.id)
         return render(self.request, self.template_name, {'form':form})
         
-
 
 class ListView(TemplateView):
     template_name = 'trello/create-list.html'
@@ -159,36 +207,10 @@ class ListView(TemplateView):
         return render(self.request, self.template_name, context)
 
 
-"""class ListView(TemplateView):
-    template_name = 'trello/board.html'
-
-    def get(self, *args, **kwargs):
-        current_list = List.objects.latest('list_title')
-        print(current_list)
-        return render(self.request, self.template_name, {'current_list':current_list})
-
-class BoardListView(TemplateView):
-    template_name = 'trello/base.html'
-
+class UpdateBoard(View):
     def post(self, *args, **kwargs):
-        all_boards = Board.objects.all(title='title')
-        context = {'all_boards':all_boards}
-        return render(self.request, self.template_name, context)
-
-
-class UpdateListView(TemplateView):
-    template_name = 'trello/create-list.html'
-
-    def get(self, *args, **kwargs):
-        post = get_object_or_404(List, pk=kwargs.get("pk"))
-        form = AddListForm(instance=post)
-        return render(self.request, self.template_name, {'form':form})
-
-    def post(self, *args, **kwargs):
-        post = get_object_or_404(List, pk=kwargs.get("pk"))
-        form = AddListForm(self.request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            current_board = get_object_or_404(Board, title=kwargs.get("title"))
-            post.board = current_board
-            post.save()"""
+        data = dict()
+        board = Board.objects.get(id=id)
+        """
+        contenteditable ang frontend. pero dapat ka maghimo og forms
+        """
