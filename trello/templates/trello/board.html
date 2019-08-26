@@ -1,19 +1,48 @@
 {% extends 'trello/base.html' %}
 {% block content %}
     <a href="{% url 'dashboard' %}">Back</a>
-    <h3 class="ml-3 p-2 w-25" id="board_container" contenteditable="true">{{ board.title }}</h3>
+    <h3 class="ml-3 p-2 w-25" id="board_container" data-listid="{{ board.id }}" contenteditable="true">{{ board.title }}</h3>
     <header>
-        <form id="list-form" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="form.list.label">{{ form.list_title.label }}</label>
-                {{ form.list_title}}
-                {{ form.list_title.errors}}
-            </div>
-        </form>
+        <div class="container float-left ml-5" id="list-container">
+            <form id="list-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.list_title}}
+                    {{ form.list_title.errors}}
+                </div>
+            </form>
+        </div>
     </header>
     <body>
-        <!-- <div class="container" id="list-container"><p>No List</p></div> -->
-        {% include 'trello/create-list.html' %}
+        <div class="container-fluid d-flex flex-wrap w-100 mt-5">
+            {% for l in board_list %}
+            <div class="card bg-warning p-1 ml-4 mt-4">
+                <div class="card-title bg-warning pt-0 pb-0 d-flex justify-content-between">
+                    <h3 class="ltitle text-white">{{ l.list_title }}</h3>
+
+                    <button type="button" class="close float-right" id="closecard">x</button>
+                </div>
+                <div class="card-body">
+                    {% for c in card %}
+                    <ul class="list-unstyled mb-1">
+                        <li class="list-unstyled m-0">
+                            <h4 class="addcard w-100 p-2">{{ c.card_title }}</h4>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                    <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=l.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ card_form.card_title}}
+                            {{ card_form.card_title.errors}}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+
+        <!--{% include 'trello/create-list.html' %}-->
     </body>
 {% endblock %}
