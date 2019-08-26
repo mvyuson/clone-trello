@@ -15,9 +15,10 @@ from .forms import (
     SignUpForm, 
     LoginForm, 
     AddBoardTitleForm, 
-    AddListForm
+    AddListForm, 
+    AddCardForm,
 )
-from .models import List, Board
+from .models import Card, List, Board
 
 import json
 
@@ -172,29 +173,49 @@ class BoardView(TemplateView):
 
     template_name = 'trello/board.html'
     form = AddListForm
+    card_form = AddCardForm
 
     def get(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
+        """
+        Get the kwargs of board_list
+        """
+
         board = get_object_or_404(Board, id=kwargs.get("id"))
+        board_list = List.objects.filter(board=board).order_by('id')
+        card = Card.objects.filter().order_by('id')
         form = self.form()
-        #board = board.id
-        context = {'board':board, 'form':form}
-        return render(self.request, self.template_name, context)
+        card_form = self.card_form()
+        print(card)
+        context = {'board':board, 'board_list':board_list, 'card':card, 'form':form, 'card_form':card_form}
+        return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
         if form.is_valid():
             board_list = form.save(commit=False)
-            board_list.board = get_object_or_404(Board, id=kwargs.get("id"))
-            board = board_list.board
+            board_list.board = get_object_or_404(Board, id=kwargs.get('id'))
             board_list.save()
-            board_list = List.objects.filter(board=board).order_by('id') 
-            form = AddListForm()
-            context = {'board':board, 'board_list':board_list, 'form':form}
-            #return render(self.request, self.template_name, context)
-            return redirect('board', id=board.id)
+            return redirect('board', board_list.board.id)
+        return render(self.request, self.template_name, {'form':form, })
+
+
+class AddCardView(TemplateView):
+    template_name = 'trello/board.html'
+    form = AddCardForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form(self.request.POST)
+        if form.is_valid():
+            card = form.save(commit=False)
+            board_list = get_object_or_404(List, id=kwargs.get('id'))
+            card.board_list = board_list
+            card.save()
+            print(card.card_title, "CARD")
+            return redirect('board', board_list.board.id)
         return render(self.request, self.template_name, {'form':form})
         
+        #list_id = kwargs.get('id')
 
 class ListView(TemplateView):
     template_name = 'trello/create-list.html'
@@ -204,13 +225,23 @@ class ListView(TemplateView):
         board_list = List.objects.order_by("id")
         context = {'board_list':board_list}
         print(board_list)
-        return render(self.request, self.template_name, context)
+        #return render(self.request, self.template_name, context)
 
 
 class UpdateBoard(View):
+    template_name = 'trello/board.html'
+
+    def get(self, *args, **kwargs):
+       board  = get_object_or_404(Board, id=kwargs.get('id'))
+       form = AddBoardTitleForm(instance=board)
+       return render(self.request, self.template_name, {'form':form})
+
     def post(self, *args, **kwargs):
-        data = dict()
-        board = Board.objects.get(id=id)
-        """
-        contenteditable ang frontend. pero dapat ka maghimo og forms
-        """
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        form = AddBoardTitleForm(self.request.POST, instance=board)
+        if form.is_valid():
+            board = form.save(commit=False)
+            board.author = self.request.user
+            board.save()
+            print(board)
+            return redirect('board', id=board.id)
