@@ -7,7 +7,9 @@ from trello.views import (
         LogoutView,
         BoardView,
         CreateBoardView,
+        AddCardView,
         ListView,
+        UpdateBoard,
 )
 
 from django.urls import path
@@ -23,7 +25,9 @@ urlpatterns = [
 
 
     path('dashboard/', DashBoardView.as_view(), name='dashboard'),
-    path('board/<int:id>/', BoardView.as_view(), name='board'),
     path('create-board/', CreateBoardView.as_view(), name='board-create'),
-    path('create-list/', ListView.as_view(), name='create-list')
+    path('board/<int:id>/', BoardView.as_view(), name='board'),
+    path('board/<int:id>/list', AddCardView.as_view(), name='add_card'),
+    path('board/<int:id>/edit', UpdateBoard.as_view(), name='update-board'),
+    #path('create-list/', ListView.as_view(), name='create-list')
 ]
