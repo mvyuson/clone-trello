@@ -1,5 +1,5 @@
 from django import forms
-from .models import Board, List
+from .models import Board, List, Card
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -64,8 +64,15 @@ class AddBoardTitleForm(forms.ModelForm):
 
 
 class AddListForm(forms.ModelForm):
-    list_title = forms.CharField(initial='')
+    list_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Add List'}))
 
     class Meta:
         model = List 
         fields = ('list_title',)
+
+class AddCardForm(forms.ModelForm):
+    card_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Add Card'}))
+
+    class Meta:
+        model = Card
+        fields = ('card_title',)
