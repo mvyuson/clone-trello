@@ -21,7 +21,7 @@ class List(models.Model):
     Dapat niya tawagon ang pangalan sa board member na naghimo sa list
     """
 
-    board = models.ForeignKey('Board', on_delete=models.CASCADE) #one to many queryset view
+    board = models.ForeignKey('Board', on_delete=models.CASCADE)
     list_title = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -56,11 +56,3 @@ class BoardMembers(models.Model):
     members = models.ForeignKey(User, on_delete=models.CASCADE) #author sa board
     deactivate = models.BooleanField(default=True)
     owner = models.BooleanField(default=False)
-
-    
-    
-
-
-
-
-
