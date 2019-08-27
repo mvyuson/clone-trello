@@ -1,7 +1,14 @@
 {% extends 'trello/base.html' %}
 {% block content %}
-    <a href="{% url 'dashboard' %}">Back</a>
-    <h3 class="ml-3 p-2 w-25" id="board_container" data-listid="{{ board.id }}" contenteditable="true">{{ board.title }}</h3>
+    <a href="{% url 'dashboard' %}"><span class="glyphicon glyphicon-chevron-left">Dashboard</span></a>
+    <div class="container-fluid d-flex justify-content-start p-0 mt-4 mb-5" id="board-title">
+        <a class="p-0 ml-5" href="{% url 'delete-board' id=board.id %}">
+            <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+        </a>
+        <h3 class="mt-4 ml-2 pl-2 pr-5" contententeditable="true" id="board_container" data-listid="{{ board.title }}">
+            {{ board.title }}
+        </h3>
+    </div>
     <header>
         <div class="container float-left ml-5" id="list-container">
             <form id="list-form" method="POST">
@@ -9,28 +16,45 @@
                 <div class="form-group">
                     {{ form.list_title}}
                     {{ form.list_title.errors}}
-                </div>
+                </div> 
             </form>
         </div>
     </header>
     <body>
+        <div id="card-modal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
         <div class="container-fluid d-flex flex-wrap w-100 mt-5">
-            {% for l in board_list %}
+            {% for list in board.list_set.all %}
             <div class="card bg-warning p-1 ml-4 mt-4">
                 <div class="card-title bg-warning pt-0 pb-0 d-flex justify-content-between">
-                    <h3 class="ltitle text-white">{{ l.list_title }}</h3>
-
-                    <button type="button" class="close float-right" id="closecard">x</button>
+                    <h3 class="ltitle text-white"><a href="{% url 'edit-list' id=list.id %}">{{ list }}</a></h3>
+                    <button type="button" class="close float-right" id="closecard"><a href="{% url 'delete-list' id=list.id %}">x</a></button>
                 </div>
                 <div class="card-body">
-                    {% for c in card %}
+                    {% for card in list.card_set.all %}
                     <ul class="list-unstyled mb-1">
                         <li class="list-unstyled m-0">
-                            <h4 class="addcard w-100 p-2">{{ c.card_title }}</h4>
+                            <h4 class="addcard w-100" action="{% url 'description' id=card.id %}" id="card">{{ card }}<button class="btn float-right" id="description"><span class="glyphicon glyphicon-pencil"></span></button></h4>
                         </li>
                     </ul>
                     {% endfor %}
-                    <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=l.id %}" method="POST">
+                    <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=list.id %}" method="POST">
                         {% csrf_token %}
                         <div class="form-group">
                             {{ card_form.card_title}}
@@ -41,8 +65,9 @@
             </div>
             {% endfor %}
         </div>
-        
-
-        <!--{% include 'trello/create-list.html' %}-->
     </body>
 {% endblock %}
+
+<!-- <a href="{% url 'card-description' id=card.id %}"> 
+    <a href="{% url 'edit-board' id=board.id %}">{{ board.title }}</a>    
+-->
