@@ -1,0 +1,15 @@
+<form class="w-100 mt-3" id="list-form" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.title}}
+        {{ form.title.errors}}
+    </div>
+</form>
+
+<form class="w-100 mt-3" id="list-form" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.list_title}}
+        {{ form.list_title.errors}}
+    </div>
+</form>
