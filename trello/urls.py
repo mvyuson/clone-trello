@@ -1,5 +1,6 @@
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
+from django.views.generic.dates import ArchiveIndexView
 from trello.views import (
         SignUpView, 
         LoginView,
@@ -8,10 +9,13 @@ from trello.views import (
         BoardView,
         CreateBoardView,
         AddCardView,
-        ListView,
         UpdateBoard,
+        DeleteBoardView,
+        UpdateListView,
+        DeleteListView,
+        CardDescriptionView,
 )
-
+from .models import List
 from django.urls import path
 
 urlpatterns = [
@@ -23,11 +27,14 @@ urlpatterns = [
     path('reset/done/', auth_views.password_reset_complete, name='password_reset_complete'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
-
     path('dashboard/', DashBoardView.as_view(), name='dashboard'),
     path('create-board/', CreateBoardView.as_view(), name='board-create'),
     path('board/<int:id>/', BoardView.as_view(), name='board'),
-    path('board/<int:id>/list', AddCardView.as_view(), name='add_card'),
-    path('board/<int:id>/edit', UpdateBoard.as_view(), name='update-board'),
-    #path('create-list/', ListView.as_view(), name='create-list')
+    path('board/<int:id>/list/', AddCardView.as_view(), name='add_card'),
+    path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
+    path('board/<int:id>/delete-board/', DeleteBoardView.as_view(), name='delete-board'),
+    path('board/<int:id>/edit-list/', UpdateListView.as_view(), name='edit-list'),
+    path('delete-list/<int:id>', DeleteListView.as_view(), name='delete-list'),
+    path('archive/', ArchiveIndexView.as_view(model=List, date_field="created_date"), name="list-archive"),
+    path('description/<int:id>', CardDescriptionView.as_view(), name='description'),
 ]
