@@ -1,0 +1,7 @@
+<ul>
+    {% for list in latest %}
+        <li>{{ list.created_date }}: {{ list.list_title }}</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'dashboard' %}">Back</a>
