@@ -5,28 +5,10 @@
 
         <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}">
         <link rel="stylesheet" href="{% static 'node_modules/bootstrap3/dist/css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/styletrello.css' %}">
+        <link rel="stylesheet" href="{% static 'css/trelloGeneral.css' %}">
     </head>
     <body>
-        <div id="modal" class="modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Modal title</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Modal body text goes here.</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-        </div>
-
+        {% include 'trello/modals.html' %}
         {% include 'trello/nav.html' %} 
         <div class="content-container">
             {% block content %}
@@ -34,7 +16,7 @@
         </div>
 
         <script src="{% static 'node_modules/jquery/dist/jquery.js' %}"></script>
-        <script src="{% static 'js/mainjsjs.js' %}"></script>
+        <script src="{% static 'js/general.js' %}"></script> 
         <!-- <script src="{% static 'js/newnewjs.js' %}"></script> -->
         <script src="{% static 'node_modules/popper.js/dist/umd/popper.js' %}"></script>
         <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.js' %}"></script>            
