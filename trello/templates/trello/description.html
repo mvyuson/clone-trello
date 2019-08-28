@@ -1,0 +1,36 @@
+<header>
+    <h2>{{ card_description.card_title }}</h2>
+    <p>in list {{ card_description.board_list }}</p>
+</header>
+<div class="row">
+    <div class="col-sm-8">
+        <div class="description">
+            <h4>Description</h4>
+            <form id="card_description" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.card_description}}
+                    {{ form.card_description.errors}}
+                </div>
+            </form>
+        </div>
+        <div class="activity">
+            <div class="row">
+                <div class="col-sm-8">
+                    <h4>Activity</h4>
+                </div>
+                <div class="col-sm-4">
+                    <button class="btn mt-1 float-right" id="show-details">Show Details</button>
+                </div>
+            </div>
+        </div>
+        <div class="checklist">
+            <h4>Comment</h4>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        Kokoko
+    </div>
+</div>
+
+
