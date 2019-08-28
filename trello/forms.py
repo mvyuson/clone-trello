@@ -64,15 +64,22 @@ class AddBoardTitleForm(forms.ModelForm):
 
 
 class AddListForm(forms.ModelForm):
-    list_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Add List'}))
+    list_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add List'}))
 
     class Meta:
         model = List 
         fields = ('list_title',)
 
 class AddCardForm(forms.ModelForm):
-    card_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Add Card'}))
+    card_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'}))
 
     class Meta:
         model = Card
         fields = ('card_title',)
+
+class AddCardDescriptionForm(forms.ModelForm):
+    card_description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'}))
+
+    class Meta:
+        model = Card 
+        fields = {'card_description',}
