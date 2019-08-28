@@ -18,6 +18,7 @@ from .forms import (
     AddBoardTitleForm, 
     AddListForm, 
     AddCardForm,
+    AddCardDescriptionForm,
 )
 from .models import Card, List, Board
 
@@ -49,7 +50,7 @@ class SignUpView(TemplateView):
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
         if form.is_valid():
-            myuser = form.save()
+            form.save()
             return redirect('login')
         context = {'form':form}
         return render(self.request, self.template_name, context)
@@ -260,8 +261,21 @@ class DeleteListView(DeleteView):
 
 
 class CardDescriptionView(TemplateView):
-    template_name = 'trello/card_description.html'
+    template_name = 'trello/description.html'
+    form = AddCardDescriptionForm
 
     def get(self, *args, **kwargs):
         card_description = get_object_or_404(Card, id=kwargs.get('id'))
-        return render(self.request, self.template_name, {'card_description':card_description})
+        form = self.form()
+        context = {'card_description':card_description, 'board_list':card_description.board_list.id, 'form':form}
+        return render(self.request, self.template_name, context)
+
+
+class ArchiveView(TemplateView):
+    template_name = 'trello/board_archive.html'
+
+    def get(self, *args, **kwargs):
+        #boards = Board.objects.filter(user=self.request.author, board__archived=False, is_confirmed=True).order_by('id')
+        board = Board.objects.filter(author=self.request.user)
+        context = {'board':board}
+        return render(self.request, self.template_name, context)
