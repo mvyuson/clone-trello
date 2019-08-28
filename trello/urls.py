@@ -14,8 +14,9 @@ from trello.views import (
         UpdateListView,
         DeleteListView,
         CardDescriptionView,
+        ArchiveView,
 )
-from .models import List
+from .models import Board
 from django.urls import path
 
 urlpatterns = [
@@ -28,13 +29,14 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 
     path('dashboard/', DashBoardView.as_view(), name='dashboard'),
-    path('create-board/', CreateBoardView.as_view(), name='board-create'),
+    path('create-board/', CreateBoardView.as_view(), name='create-board'),
     path('board/<int:id>/', BoardView.as_view(), name='board'),
     path('board/<int:id>/list/', AddCardView.as_view(), name='add_card'),
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
     path('board/<int:id>/delete-board/', DeleteBoardView.as_view(), name='delete-board'),
     path('board/<int:id>/edit-list/', UpdateListView.as_view(), name='edit-list'),
     path('delete-list/<int:id>', DeleteListView.as_view(), name='delete-list'),
-    path('archive/', ArchiveIndexView.as_view(model=List, date_field="created_date"), name="list-archive"),
+    #path('board_archive/', ArchiveIndexView.as_view(model=Board, date_field="created_date")),
+    path('board_archive/', ArchiveView.as_view(), name='board_archive'),
     path('description/<int:id>', CardDescriptionView.as_view(), name='description'),
 ]
