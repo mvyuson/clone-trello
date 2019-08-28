@@ -1,0 +1,7 @@
+<h2>Personal Boards</h2>
+<ul>
+    {% for board in board %}
+        <li class="list-unstyled">{{ board.created_date }}: {{ board.title }}</li>
+    {% endfor %}
+</ul> 
+
