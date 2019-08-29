@@ -1,7 +1,54 @@
-<h2>Personal Boards</h2>
+<h4 class="ml-5">Boards</h4>
 <ul>
-    {% for board in board %}
-        <li class="list-unstyled">{{ board.created_date }}: {{ board.title }}</li>
+    {% for board in archive_boards %}
+        <li class="list-unstyled">
+            <div class="row">
+                <div class="col-9 pt-3 border-bottom">
+                    {{ board.created_date }}: {{ board.title }}
+                </div>
+                <div class="col-1 pb-1 border-bottom">
+                    <a class="float-left  text-secondary" href="{% url 'delete-board' id=board.id %}">
+                        <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+                    </a>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+</ul> 
+
+<h4 class="mt-5 ml-5">List</h4>
+<ul>
+    {% for list in archive_list %}
+        <li class="list-unstyled">
+            <div class="row">
+                <div class="col-9 pt-3 border-bottom">
+                    {{ list.created_date }}: {{ list.list_title }}
+                </div>
+                <div class="col-1 pb-1 border-bottom">
+                    <a class="text-secondary" href="{% url 'delete-list' id=list.id %}">
+                        <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+                    </a>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+</ul> 
+
+<h4 class="mt-5 ml-5">Cards</h4>
+<ul>
+    {% for card in archive_card %}
+        <li class="list-unstyled">
+            <div class="row">
+                <div class="col-9 pt-3 border-bottom">
+                    {{ card.created_date }}: {{ card.card_title }}
+                </div>
+                <div class="col-1 pb-1 border-bottom">
+                    <a class="text-secondary" href="{% url 'delete-card' id=card.id %}">
+                        <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+                    </a>
+                </div>
+            </div>
+        </li>
     {% endfor %}
 </ul> 
 
