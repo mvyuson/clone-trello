@@ -1,4 +1,4 @@
-from django.views.generic.edit import DeleteView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.views.generic import TemplateView, RedirectView, View
 from django.template.loader import render_to_string
 from django.contrib.auth.forms import PasswordChangeForm
@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 from .forms import (
     SignUpForm, 
@@ -19,8 +20,9 @@ from .forms import (
     AddListForm, 
     AddCardForm,
     AddCardDescriptionForm,
+    InviteMemberForm,
 )
-from .models import Card, List, Board
+from .models import Card, List, Board, BoardMembers
 
 import json
 
@@ -158,7 +160,25 @@ class CreateBoardView(TemplateView):
         else:
             return HttpResponse(status=400)
         return render(self.request, self.template_name,  {'form':form})
- 
+
+
+class InviteMemberView(TemplateView):
+    template_name = 'trello/board.html'
+    form = InviteMemberForm
+
+    def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        member_board = get_object_or_404(Board, id=kwargs.get('id'))
+        form = self.form(self.request.POST)
+        if form.is_valid():
+            member = form.save(commit=False)
+            print(member.username)
+            member.board = member_board
+            form.save()
+            return redirect('board', member_board.id)
+        return render(self.request, self.template_name, {'form':form})
+
+
 
 class BoardView(TemplateView):
     """
@@ -170,17 +190,21 @@ class BoardView(TemplateView):
     template_name = 'trello/board.html'
     form = AddListForm
     card_form = AddCardForm
+    board_form = AddBoardTitleForm
+    invite_form = InviteMemberForm
 
     def get(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         """
         Get the kwargs of board_list
         """
+        #import pdb; pdb.set_trace()
 
-        board = get_object_or_404(Board, id=kwargs.get("id"))        
+        board = get_object_or_404(Board, id=kwargs.get("id")) 
         form = self.form()
         card_form = self.card_form()
-        context = {'board':board, 'form':form, 'card_form':card_form}
+        invite_form = self.invite_form()
+        board_form = self.board_form(self.request.POST, instance=board)
+        context = {'board':board, 'form':form, 'card_form':card_form, 'board_form':board_form, 'invite_form':invite_form,}
         return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
@@ -190,7 +214,7 @@ class BoardView(TemplateView):
             board_list.board = get_object_or_404(Board, id=kwargs.get('id'))
             board_list.save()
             return redirect('board', board_list.board.id)
-        return render(self.request, self.template_name, {'form':form, })
+        return render(self.request, self.template_name, {'form':form})
 
 
 class AddCardView(TemplateView):
@@ -209,24 +233,57 @@ class AddCardView(TemplateView):
         return render(self.request, self.template_name, {'form':form})
 
 
-class UpdateBoard(TemplateView):
-    template_name = 'trello/edit.html'
-    
+class CardDescriptionView(TemplateView):
+    template_name = 'trello/description.html'
+    form = AddCardDescriptionForm
+    card_form = AddCardForm
+
     def get(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        edit_board = get_object_or_404(Board, id=kwargs.get('id'))
-        form = AddBoardTitleForm(instance=edit_board)
-        return render(self.request, self.template_name, {'form':form})
+        card = get_object_or_404(Card, id=kwargs.get('id'))
+        card_form = self.card_form(self.request.POST, instance=card)
+        form = self.form()
+        context = {'card':card, 'board_list':card.board_list.id, 'form':form, 'card_form':card_form}
+        return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        edit_board = get_object_or_404(Board, id=kwargs.get('id'))
-        form = AddBoardTitleForm(self.request.POST, instance=edit_board)
+        card = get_object_or_404(Card, id=kwargs.get('id'))
+        card_form = self.card_form(self.request.POST, instance=card)
+        if card_form.is_valid():
+            card_form.save()
+            board = card.board_list.board.id 
+            return redirect('board', card)
+        return render(self.request, self.template_name, {'card_form':card_form})
+
+
+class UpdateBoard(TemplateView):
+    template_name = 'trello/board.html'
+    form = AddBoardTitleForm
+
+    def post(self, *args, **kwargs):
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        form = self.form(self.request.POST, instance=board)
         if form.is_valid():
-            edit_board = form.save(commit=False)
-            edit_board.author = self.request.user
-            edit_board.save()
-            return redirect('board', id=edit_board.id)
+            form.save()
+            return redirect('board', board.id)
         return render(self.request, self.template_name, {'form':form})
+
+
+class UpdateListView(TemplateView):
+    template_name = 'trello/board.html'
+    form = AddListForm
+
+    def get(self, *args, **kwargs):
+        edit_list = get_object_or_404(List, id=kwargs.get('id'))
+        list_form = self.form(self.request.POST, instance=edit_list)
+        return render(self.request, self.template_name, {'list_form':list_form})
+
+    def post(self, *args, **kwargs):
+        edit_list = get_object_or_404(List, id=kwargs.get('id'))
+        list_form = self.form(self.request.POST, instance=edit_list)
+        if list_form.is_valid():
+            list_form.save()
+            return redirect('board', id=edit_list.board.id)
+        return render(self.request, self.template_name, {'list_form':list_form})
 
 
 class DeleteBoardView(DeleteView):
@@ -234,22 +291,6 @@ class DeleteBoardView(DeleteView):
         board_to_delete = get_object_or_404(Board, id=kwargs.get('id'))
         board_to_delete.delete()
         return redirect('dashboard')
-
-class UpdateListView(TemplateView):
-    template_name = 'trello/edit.html'
-
-    def get(self, *args, **kwargs):
-        edit_list = get_object_or_404(List, id=kwargs.get('id'))
-        form = AddListForm(instance=edit_list)
-        return render(self.request, self.template_name, {'form':form})
-
-    def post(self, *args, **kwargs):
-        edit_list = get_object_or_404(List, id=kwargs.get('id'))
-        form = AddListForm(self.request.POST, instance=edit_list)
-        if form.is_valid():
-            edit_list = form.save()
-            return redirect('board', id=edit_list.board.id)
-        return render(self.request, self.template_name, {'form':form})
 
 
 class DeleteListView(DeleteView):
@@ -260,22 +301,46 @@ class DeleteListView(DeleteView):
         return redirect('board', board)
 
 
-class CardDescriptionView(TemplateView):
-    template_name = 'trello/description.html'
-    form = AddCardDescriptionForm
-
+class DeleteCardView(DeleteView):
     def get(self, *args, **kwargs):
-        card_description = get_object_or_404(Card, id=kwargs.get('id'))
-        form = self.form()
-        context = {'card_description':card_description, 'board_list':card_description.board_list.id, 'form':form}
-        return render(self.request, self.template_name, context)
+        card_to_delete = get_object_or_404(Card, id=kwargs.get('id'))
+        board = card_to_delete.board_list.board.id 
+        card_to_delete.delete()
+        return redirect('board', board)
+
+
+class BoardArchiveView(View):
+    def get(self, *args, **kwargs):
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        board.archived = True 
+        board.save()
+        return redirect('dashboard')
+
+
+class ListArchiveView(View):
+    def get(self, *args, **kwargs):
+        board_list = get_object_or_404(List, id=kwargs.get('id'))
+        board_list.archived = True 
+        board_list.save()
+        return redirect('board', board_list.board.id)
+
+
+class CardArchiveView(View):
+    def get(self, *args, **kwargs):
+        card = get_object_or_404(Card, id=kwargs.get('id'))
+        card.archived = True 
+        card.save()
+        return redirect('board', card.board_list.board.id)
 
 
 class ArchiveView(TemplateView):
     template_name = 'trello/board_archive.html'
 
     def get(self, *args, **kwargs):
-        #boards = Board.objects.filter(user=self.request.author, board__archived=False, is_confirmed=True).order_by('id')
-        board = Board.objects.filter(author=self.request.user)
-        context = {'board':board}
+        #board = Board.objects.filter(author=self.request.user)
+        archive_boards = Board.objects.filter(author=self.request.user, archived=True).order_by('created_date')
+        archive_list = List.objects.filter(archived=True).order_by('created_date')
+        archive_card = Card.objects.filter(archived=True).order_by('created_date')
+        context = {'archive_boards':archive_boards, 'archive_list':archive_list, 'archive_card':archive_card}
         return render(self.request, self.template_name, context)
+
