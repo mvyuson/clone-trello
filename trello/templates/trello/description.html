@@ -1,18 +1,30 @@
+{% extends 'trello/static_files.html' %}
+{% block content %}
 <header>
-    <h2>{{ card_description.card_title }}</h2>
+    <h2 id="card_container"><a class="text-dark" href="">{{ card.card_title }}</a></h2>
+    <form id="updateCardForm" action="{% url 'description' card.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ card_form.card_title}}
+        </div>
+    </form>
     <p>in list {{ card_description.board_list }}</p>
 </header>
 <div class="row">
     <div class="col-sm-8">
         <div class="description">
             <h4>Description</h4>
-            <form id="card_description" method="POST">
+            <form id="card_description_edit" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
                     {{ form.card_description}}
                     {{ form.card_description.errors}}
                 </div>
+                <button type="submit" class="btn btn-success mb-3">Save</button><br>
             </form>
+            <div class="container" id="card_description">
+                <p>{{ card.card_description }}KOKOKOKOKO</p>
+            </div>
         </div>
         <div class="activity">
             <div class="row">
@@ -29,8 +41,8 @@
         </div>
     </div>
     <div class="col-sm-4">
-        Kokoko
+        <a class="text-dark" href="{% url 'card-archive' card.id %}">Archive Card</a>
     </div>
 </div>
-
+{% endblock %}
 
