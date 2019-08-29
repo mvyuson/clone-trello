@@ -1,5 +1,5 @@
 from django import forms
-from .models import Board, List, Card
+from .models import Board, List, Card, BoardMembers
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -70,6 +70,7 @@ class AddListForm(forms.ModelForm):
         model = List 
         fields = ('list_title',)
 
+
 class AddCardForm(forms.ModelForm):
     card_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'}))
 
@@ -77,9 +78,28 @@ class AddCardForm(forms.ModelForm):
         model = Card
         fields = ('card_title',)
 
+
 class AddCardDescriptionForm(forms.ModelForm):
     card_description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'}))
 
     class Meta:
         model = Card 
         fields = {'card_description',}
+
+
+class InviteMemberForm(forms.ModelForm):
+    member = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Username'}))
+
+    class Meta:
+        model = BoardMembers
+        fields = {'members',}
+
+    def clean_member(self):
+        member = self.cleaned_data['member']
+        board_member = User.objects.filter(username=member)
+        if board_member.exists():
+            pass 
+        else:
+            raise forms.ValidationError('No User Exists')
+        
+        return member
