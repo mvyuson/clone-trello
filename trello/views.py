@@ -121,7 +121,7 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
     form = AddBoardTitleForm
 
     def get(self, *args, **kwargs):
-        board = Board.objects.filter(author=self.request.user).order_by('id')
+        board = Board.objects.filter(author=self.request.user, archived=False).order_by('id')
         board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
         board_owner = BoardMembers.objects.filter(owner=True)
         return render(self.request, self.template_name, {'board':board, 'board_member':board_member, 'board_owner':board_owner})

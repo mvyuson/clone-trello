@@ -60,48 +60,52 @@
     <body>
         <div class="container-fluid d-flex flex-wrap w-100 mt-5">
             {% for list in board.list_set.all %}
-            <div class="card p-1 ml-4 mt-5">
-                <div class="card-title pt-3 pb-0 d-flex justify-content-between">
-                    <h3 class="ltitle mt-0" id="list_container"><a href="" id="list" >{{ list }}</a></h3>
-                    <form class="mt-3" action="{% url 'edit-list' list.id %}" id="updateListForm" method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            {{ list_form.list_title}}
-                        </div>
-                    </form>
-                    <div class="dropdown p-0 float-right" id="list-dropdown">
-                        <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            ...
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="text-dark ml-5" href="{% url 'list-archive' list.id %}">Archive List</a>
+                {% if list.archived == False %}
+                <div class="card p-1 ml-4 mt-5">
+                    <div class="card-title pt-3 pb-0 d-flex justify-content-between">
+                        <h3 class="ltitle mt-0" id="list_container"><a href="" id="list" >{{ list }}</a></h3>
+                        <form class="mt-3" action="{% url 'edit-list' list.id %}" id="updateListForm" method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ list_form.list_title}}
+                            </div>
+                        </form>
+                        <div class="dropdown p-0 float-right" id="list-dropdown">
+                            <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                ...
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="text-dark ml-5" href="{% url 'list-archive' list.id %}">Archive List</a>
+                            </div>
                         </div>
                     </div>
+                    <div class="card-body pb-0">
+                        {% for card in list.card_set.all %}
+                            {% if card.archived == False %}
+                                <ul class="list-unstyled mb-2">
+                                    <li class="list-unstyled m-0">
+                                        <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
+                                            <h4 class="addcard w-100" id="card">
+                                                {{ card }}
+                                                <button class="btn float-right" id="description">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                            </h4>
+                                        </a>
+                                    </li>
+                                </ul>
+                            {% endif %}
+                        {% endfor %}
+                        <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=list.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ card_form.card_title}}
+                                {{ card_form.card_title.errors}}
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body pb-0">
-                    {% for card in list.card_set.all %}
-                    <ul class="list-unstyled mb-2">
-                        <li class="list-unstyled m-0">
-                            <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
-                                <h4 class="addcard w-100" id="card">
-                                    {{ card }}
-                                    <button class="btn float-right" id="description">
-                                        <span class="glyphicon glyphicon-pencil"></span>
-                                    </button>
-                                </h4>
-                            </a>
-                        </li>
-                    </ul>
-                    {% endfor %}
-                    <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=list.id %}" method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            {{ card_form.card_title}}
-                            {{ card_form.card_title.errors}}
-                        </div>
-                    </form>
-                </div>
-            </div>
+                {% endif %}
             {% endfor %}
         </div>
     </body>
