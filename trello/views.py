@@ -122,7 +122,9 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         board = Board.objects.filter(author=self.request.user).order_by('id')
-        return render(self.request, self.template_name, {'board':board})
+        board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
+        board_owner = BoardMembers.objects.filter(owner=True)
+        return render(self.request, self.template_name, {'board':board, 'board_member':board_member, 'board_owner':board_owner})
  
 
 class CreateBoardView(TemplateView):
@@ -162,24 +164,6 @@ class CreateBoardView(TemplateView):
         return render(self.request, self.template_name,  {'form':form})
 
 
-class InviteMemberView(TemplateView):
-    template_name = 'trello/board.html'
-    form = InviteMemberForm
-
-    def post(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        member_board = get_object_or_404(Board, id=kwargs.get('id'))
-        form = self.form(self.request.POST)
-        if form.is_valid():
-            member = form.save(commit=False)
-            print(member.username)
-            member.board = member_board
-            form.save()
-            return redirect('board', member_board.id)
-        return render(self.request, self.template_name, {'form':form})
-
-
-
 class BoardView(TemplateView):
     """
     Display the current board title by calling its id
@@ -200,11 +184,13 @@ class BoardView(TemplateView):
         #import pdb; pdb.set_trace()
 
         board = get_object_or_404(Board, id=kwargs.get("id")) 
+        board_members = BoardMembers.objects.filter(board=board).order_by('id')
+        #new_board = Board.objects.get(id=board.id, archived=False)      #nakaqueryset siya
         form = self.form()
         card_form = self.card_form()
         invite_form = self.invite_form()
         board_form = self.board_form(self.request.POST, instance=board)
-        context = {'board':board, 'form':form, 'card_form':card_form, 'board_form':board_form, 'invite_form':invite_form,}
+        context = {'board':board, 'board_members':board_members, 'form':form, 'card_form':card_form, 'board_form':board_form, 'invite_form':invite_form,}
         return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
@@ -212,6 +198,7 @@ class BoardView(TemplateView):
         if form.is_valid():
             board_list = form.save(commit=False)
             board_list.board = get_object_or_404(Board, id=kwargs.get('id'))
+            board_list.author = self.request.user
             board_list.save()
             return redirect('board', board_list.board.id)
         return render(self.request, self.template_name, {'form':form})
@@ -227,6 +214,7 @@ class AddCardView(TemplateView):
             card = form.save(commit=False)
             board_list = get_object_or_404(List, id=kwargs.get('id'))
             card.board_list = board_list
+            card.author = self.request.user
             card.save()
             print(card.card_title, "CARD")
             return redirect('board', board_list.board.id)
@@ -241,18 +229,40 @@ class CardDescriptionView(TemplateView):
     def get(self, *args, **kwargs):
         card = get_object_or_404(Card, id=kwargs.get('id'))
         card_form = self.card_form(self.request.POST, instance=card)
-        form = self.form()
+        form = self.form(self.request.POST, instance=card)
         context = {'card':card, 'board_list':card.board_list.id, 'form':form, 'card_form':card_form}
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         card = get_object_or_404(Card, id=kwargs.get('id'))
         card_form = self.card_form(self.request.POST, instance=card)
         if card_form.is_valid():
             card_form.save()
             board = card.board_list.board.id 
-            return redirect('board', card)
+            print(board)
+            return redirect('board', card.board_list.board.id)
         return render(self.request, self.template_name, {'card_form':card_form})
+
+
+class AddCardDescriptionView(TemplateView):
+    template_name = 'trello/description.html'
+    form = AddCardDescriptionForm
+
+    """
+    Wala nisulod dire
+    """
+
+    def post(self, *args, **kwargs):
+        import pdb; pdb.set_trace()
+        card = get_object_or_404(Card, id=kwargs.get('id'))
+        form = self.form(self.request.POST, instance=card)
+        if form.is_valid():
+            card_description = form.save()
+            card_description.author = self.request.user
+            print(card_description, "KOKOKOKOK")
+            return redirect('board', card.board_list.board.id)
+        return render(self.request, self.template_name, {'form':form})
 
 
 class UpdateBoard(TemplateView):
@@ -337,10 +347,27 @@ class ArchiveView(TemplateView):
     template_name = 'trello/board_archive.html'
 
     def get(self, *args, **kwargs):
-        #board = Board.objects.filter(author=self.request.user)
         archive_boards = Board.objects.filter(author=self.request.user, archived=True).order_by('created_date')
-        archive_list = List.objects.filter(archived=True).order_by('created_date')
-        archive_card = Card.objects.filter(archived=True).order_by('created_date')
+        archive_list = List.objects.filter(author=self.request.user, archived=True).order_by('created_date')
+        archive_card = Card.objects.filter(author=self.request.user, archived=True).order_by('created_date')
         context = {'archive_boards':archive_boards, 'archive_list':archive_list, 'archive_card':archive_card}
         return render(self.request, self.template_name, context)
 
+
+class InviteMemberView(TemplateView):
+    template_name = 'trello/board.html'
+    form = InviteMemberForm
+
+    def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        form = self.form(self.request.POST)
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        new_member = self.request.POST.get('members')
+        if form.is_valid():                                            
+            member = form.save(commit=False)
+            member.board = get_object_or_404(Board, id=kwargs.get('id'))
+            member.deactivate = False
+            member.owner = True
+            member.save()
+            return redirect('board', board.id)
+        return render(self.request, self.template_name, {'form':form})  
