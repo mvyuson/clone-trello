@@ -64,7 +64,9 @@ class AddBoardTitleForm(forms.ModelForm):
 
 
 class AddListForm(forms.ModelForm):
-    list_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add List'}))
+    list_title = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add List'})
+    )
 
     class Meta:
         model = List 
@@ -72,7 +74,9 @@ class AddListForm(forms.ModelForm):
 
 
 class AddCardForm(forms.ModelForm):
-    card_title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'}))
+    card_title = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'})
+    )
 
     class Meta:
         model = Card
@@ -80,7 +84,9 @@ class AddCardForm(forms.ModelForm):
 
 
 class AddCardDescriptionForm(forms.ModelForm):
-    card_description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'}))
+    card_description = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'})
+    )
 
     class Meta:
         model = Card 
@@ -88,18 +94,22 @@ class AddCardDescriptionForm(forms.ModelForm):
 
 
 class InviteMemberForm(forms.ModelForm):
-    member = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Username'}))
+    members = forms.ModelChoiceField(
+        queryset=User.objects.all(), 
+        required=False, 
+        to_field_name='username',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Username'})
+    )
 
     class Meta:
         model = BoardMembers
         fields = {'members',}
 
-    def clean_member(self):
-        member = self.cleaned_data['member']
-        board_member = User.objects.filter(username=member)
-        if board_member.exists():
-            pass 
-        else:
-            raise forms.ValidationError('No User Exists')
-        
-        return member
+    # def clean_member(self):
+    #     import pdb; pdb.set_trace()
+    #     members = self.cleaned_data['members']
+    #     board_member = BoardMembers.objects.filter(members=members)
+    #     print(board_member.members)
+    #     if board_member.exists():      
+    #        raise forms.ValidationError('User was already a member.') 
+    #     return members
