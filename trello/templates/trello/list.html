@@ -4,7 +4,10 @@
 <div class="container-fluid mt-3">
     <h2 class="mb-5">List of Boards</h2>
     {% for b in board %}
-        <ul class="list-unstyled ml-3"><li><a href="{% url 'board' id=b.id %}">{{ b.title }} </a></li></ul>
+        <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' id=b.id %}">{{ b.title }} </a></li></ul>
+    {% endfor %}
+    {% for boards in board_member %}
+        <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
     {% endfor %}
 </div>
 {% endblock %}
