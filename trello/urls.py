@@ -10,6 +10,7 @@ from trello.views import (
         CreateBoardView,
         AddCardView,
         CardDescriptionView,
+        AddCardDescriptionView,
         UpdateBoard,
         UpdateListView,
         DeleteBoardView,
@@ -20,7 +21,6 @@ from trello.views import (
         ListArchiveView,
         CardArchiveView,
         InviteMemberView,
-
 )
 from .models import Board
 from django.urls import path
@@ -38,7 +38,9 @@ urlpatterns = [
     path('create-board/', CreateBoardView.as_view(), name='create-board'),
     path('board/<int:id>/', BoardView.as_view(), name='board'),
     path('board/<int:id>/list/', AddCardView.as_view(), name='add_card'),
+    path('invite-member/<int:id>/', InviteMemberView.as_view(), name='invite-member'),
     path('description/<int:id>/', CardDescriptionView.as_view(), name='description'),
+    path('description/<int:id>/add-card-description', AddCardDescriptionView.as_view(), name='add-card-description'),
 
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
     path('board/<int:id>/edit-list/', UpdateListView.as_view(), name='edit-list'),
@@ -50,7 +52,5 @@ urlpatterns = [
     path('archive/', ArchiveView.as_view(), name='archive'),
     path('board-archive/<int:id>/', BoardArchiveView.as_view(), name='board-archive'),
     path('list-archive/<int:id>/', ListArchiveView.as_view(), name='list-archive'),
-    path('card-archive/<int:id>/,', CardArchiveView.as_view(), name='card-archive'),
-
-    path('invite-member/<int:id>/', InviteMemberView.as_view(), name='invite-member'),
+    path('card-archive/<int:id>/', CardArchiveView.as_view(), name='card-archive'),
 ]
