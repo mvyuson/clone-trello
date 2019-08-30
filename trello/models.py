@@ -8,6 +8,7 @@ from datetime import datetime
 
 class Card(models.Model):
     board_list = models.ForeignKey('List', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     card_title = models.CharField(max_length=200)
     card_description = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
@@ -24,6 +25,7 @@ class List(models.Model):
     """
 
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     list_title = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -57,6 +59,6 @@ class BoardMembers(models.Model):
     """
 
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
-    members = models.ForeignKey(User, on_delete=models.CASCADE) #author sa board
+    members = models.ForeignKey(User, on_delete=models.CASCADE)
     deactivate = models.BooleanField(default=True)
     owner = models.BooleanField(default=False)
