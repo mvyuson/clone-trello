@@ -8,22 +8,21 @@
             {{ card_form.card_title}}
         </div>
     </form>
-    <p>in list {{ card_description.board_list }}</p>
+    <p>in list {{ card.board_list }}</p>
 </header>
-<div class="row">
+<div class="row pr-0">
     <div class="col-sm-8">
         <div class="description">
             <h4>Description</h4>
-            <form id="card_description_edit" method="POST">
+            <form class="description-form" id="card_description_edit" action="{% url 'add-card-description' card.id %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
                     {{ form.card_description}}
-                    {{ form.card_description.errors}}
                 </div>
                 <button type="submit" class="btn btn-success mb-3">Save</button><br>
             </form>
             <div class="container" id="card_description">
-                <p>{{ card.card_description }}KOKOKOKOKO</p>
+                <p>{{ card_description.card_description }}</p>
             </div>
         </div>
         <div class="activity">
@@ -41,7 +40,7 @@
         </div>
     </div>
     <div class="col-sm-4">
-        <a class="text-dark" href="{% url 'card-archive' card.id %}">Archive Card</a>
+        <button class="btn ml-5" id="archive-card"><a class="text-dark" href="{% url 'card-archive' card.id %}">Archive Card</a></button>
     </div>
 </div>
 {% endblock %}
