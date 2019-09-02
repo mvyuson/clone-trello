@@ -1,0 +1,7 @@
+<form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=list.id %}" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ card_form.card_title}}
+        {{ card_form.card_title.errors}}
+    </div>
+</form>
