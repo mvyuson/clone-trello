@@ -185,7 +185,6 @@ class BoardView(TemplateView):
 
         board = get_object_or_404(Board, id=kwargs.get("id")) 
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
-        #new_board = Board.objects.get(id=board.id, archived=False)      #nakaqueryset siya
         form = self.form()
         card_form = self.card_form()
         invite_form = self.invite_form()
@@ -200,7 +199,9 @@ class BoardView(TemplateView):
             board_list.board = get_object_or_404(Board, id=kwargs.get('id'))
             board_list.author = self.request.user
             board_list.save()
-            return redirect('board', board_list.board.id)
+            return JsonResponse({'board_list':board_list.list_title, 'id':board_list.id})
+        else: 
+            return HttpResponse(status=400)
         return render(self.request, self.template_name, {'form':form})
 
 
@@ -266,34 +267,25 @@ class AddCardDescriptionView(TemplateView):
 
 
 class UpdateBoard(TemplateView):
-    template_name = 'trello/board.html'
-    form = AddBoardTitleForm
-
     def post(self, *args, **kwargs):
+        update_board = self.request.POST.get('board_title') 
         board = get_object_or_404(Board, id=kwargs.get('id'))
-        form = self.form(self.request.POST, instance=board)
-        if form.is_valid():
-            form.save()
-            return redirect('board', board.id)
-        return render(self.request, self.template_name, {'form':form})
+        current_board = Board.objects.get(id=board.id)
+        current_board.title = update_board 
+        current_board.save()
+        return JsonResponse({'board':current_board.title})
 
 
 class UpdateListView(TemplateView):
-    template_name = 'trello/board.html'
-    form = AddListForm
-
-    def get(self, *args, **kwargs):
-        edit_list = get_object_or_404(List, id=kwargs.get('id'))
-        list_form = self.form(self.request.POST, instance=edit_list)
-        return render(self.request, self.template_name, {'list_form':list_form})
-
     def post(self, *args, **kwargs):
-        edit_list = get_object_or_404(List, id=kwargs.get('id'))
-        list_form = self.form(self.request.POST, instance=edit_list)
-        if list_form.is_valid():
-            list_form.save()
-            return redirect('board', id=edit_list.board.id)
-        return render(self.request, self.template_name, {'list_form':list_form})
+        update_list = self.request.POST.get('list_title')
+        print(update_list)
+        board_list = get_object_or_404(List, id=kwargs.get('id')) #mali
+        current_list = List.objects.get(id=board_list.id)
+        current_list.list_title = update_list
+        current_list.save()
+        print(current_list.list_title, 'KOKOKOKO')
+        return JsonResponse({'board_list':current_list.list_title})
 
 
 class DeleteBoardView(DeleteView):
@@ -332,7 +324,7 @@ class ListArchiveView(View):
         board_list = get_object_or_404(List, id=kwargs.get('id'))
         board_list.archived = True 
         board_list.save()
-        return redirect('board', board_list.board.id)
+        return JsonResponse({'board':board_list.board.id})
 
 
 class CardArchiveView(View):
