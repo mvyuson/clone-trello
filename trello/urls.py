@@ -43,7 +43,7 @@ urlpatterns = [
     path('description/<int:id>/add-card-description', AddCardDescriptionView.as_view(), name='add-card-description'),
 
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
-    path('board/<int:id>/edit-list/', UpdateListView.as_view(), name='edit-list'),
+    path('edit-list/<int:id>/', UpdateListView.as_view(), name='edit-list'),
 
     path('board/<int:id>/delete-board/', DeleteBoardView.as_view(), name='delete-board'),
     path('delete-list/<int:id>/', DeleteListView.as_view(), name='delete-list'),
