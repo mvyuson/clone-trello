@@ -206,64 +206,51 @@ class BoardView(TemplateView):
 
 
 class AddCardView(TemplateView):
-    template_name = 'trello/board.html'
-    form = AddCardForm
 
     def post(self, request, *args, **kwargs):
-        form = self.form(self.request.POST)
-        if form.is_valid():
-            card = form.save(commit=False)
-            board_list = get_object_or_404(List, id=kwargs.get('id'))
-            card.board_list = board_list
-            card.author = self.request.user
+        #import pdb; pdb.set_trace()
+        if self.request.POST.get('card_title'):
+            card_list = get_object_or_404(List, id=kwargs.get('id'))
+            title = self.request.POST.get('card_title')
+            card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
             card.save()
-            print(card.card_title, "CARD")
-            return redirect('board', board_list.board.id)
-        return render(self.request, self.template_name, {'form':form})
+            return JsonResponse({'card':card.card_title, 'id':card.id})
+            
+            # card = Card.objects.get(board_list=card_list) #get() returned more than one Card -- it returned 13!
+            # card.author = self.request.user
+            # card.save()
+            # return JsonResponse({'card':card.card_title})
 
 
 class CardDescriptionView(TemplateView):
     template_name = 'trello/description.html'
     form = AddCardDescriptionForm
-    card_form = AddCardForm
 
     def get(self, *args, **kwargs):
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        card_form = self.card_form(self.request.POST, instance=card)
-        form = self.form(self.request.POST, instance=card)
-        context = {'card':card, 'board_list':card.board_list.id, 'form':form, 'card_form':card_form}
+        context = {'card':card, 'board_list':card.board_list.id}
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
+        update_card = self.request.POST.get('card_title')
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        card_form = self.card_form(self.request.POST, instance=card)
-        if card_form.is_valid():
-            card_form.save()
-            board = card.board_list.board.id 
-            print(board)
-            return redirect('board', card.board_list.board.id)
-        return render(self.request, self.template_name, {'card_form':card_form})
+        current_card = Card.objects.get(id=card.id)
+        current_card.card_title = update_card
+        current_card.save()
+        return JsonResponse({'card':current_card.card_title})
 
 
 class AddCardDescriptionView(TemplateView):
-    template_name = 'trello/description.html'
-    form = AddCardDescriptionForm
-
-    """
-    Wala nisulod dire
-    """
 
     def post(self, *args, **kwargs):
-        import pdb; pdb.set_trace()
+        description = self.request.POST.get('card_description')
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        form = self.form(self.request.POST, instance=card)
-        if form.is_valid():
-            card_description = form.save()
-            card_description.author = self.request.user
-            print(card_description, "KOKOKOKOK")
-            return redirect('board', card.board_list.board.id)
-        return render(self.request, self.template_name, {'form':form})
+        current_description = Card.objects.get(id=card.id)
+        current_description.card_description = description
+        print(current_description.card_description)
+        current_description.save()
+        return JsonResponse({'card_description':current_description.card_description})
 
 
 class UpdateBoard(TemplateView):
@@ -316,7 +303,7 @@ class BoardArchiveView(View):
         board = get_object_or_404(Board, id=kwargs.get('id'))
         board.archived = True 
         board.save()
-        return redirect('dashboard')
+        return JsonResponse({'board':board.id})
 
 
 class ListArchiveView(View):
