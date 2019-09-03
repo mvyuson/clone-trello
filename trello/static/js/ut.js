@@ -24,8 +24,28 @@ function editBoard(){
         $(this).hide();
         $('#edit-board').show();
         updateBoard();
+        mouseoutBoard();
+    });   
+}
+
+function mouseoutBoard(){
+    $(document).mouseup(function(e){
+
+        var con = $('#board-edit-form');
+        var con2 = $('#card-edit-form');
+
+        if(!con.is(e.target) && con.has(e.target).length === 0){
+            $('.board-title').show();
+            $('#edit-board').hide();
+        }
+
+        if(!con2.is(e.target) && con2.has(e.target).length === 0){
+            $('.card-title-description').show();
+            $('#updateCardForm').hide();
+        }
     });
 }
+
 
 function updateBoard(){
     $('#board-edit-form').on('submit', function(e){
@@ -44,6 +64,7 @@ function updateBoard(){
         });
     });
 }
+
 
 
 function editList(){
@@ -91,25 +112,37 @@ function updateList(template, list_id){
 // }
 
 function editCard(){
-    $('#card_container').on('click', function(e){
+    $('.card-title-description').on('click', function(e){
         e.preventDefault();
         console.log('Edit Card');
         $(this).hide();
         $('#updateCardForm').show();
         updateCard();
+        mouseoutBoard();
     })
 }
 
 function updateCard(){
-    $('#updateCardForm').on('submit', function(e){
-        $(this).hide();
-        $('#card_container').show();
-       
+    $('#card-edit-form').on('submit', function(e){
+        console.log('Card Submit!');
+        e.preventDefault();
+        $.ajax({
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            method: 'POST'
+        }).done(function(data){
+            e.preventDefault();
+            $('.card-title-description').show();
+            $('header').find('.card-title-description').html(data.card)
+            console.log(data)
+            $('#updateCardForm').hide();
+        });
     })
 }
 
+
 function createBoard() {
-    $('#board-edit-form').on('submit', function(e){
+    $('#board-form').on('submit', function(e){
         console.log('Joho Boardsie');
         e.preventDefault();
         $.ajax({
@@ -117,6 +150,7 @@ function createBoard() {
             data: $(this).serialize(),
             method: 'POST'
         }).done(function(data){
+            e.preventDefault();
             $('#modal-id').modal('hide');
             window.location.href = '/board/'+data.board;  
         }).fail(function(xhr, data){
@@ -126,12 +160,55 @@ function createBoard() {
     });
 }
 
-function cardDescription(){
-    $('.description-form').on('submit', function(e){
-        console.log('CARD DESCRIPTION')
+function createCard(){
+    $('.create-card').on('submit', function(e){
+        var gy = $(this).attr('action');
+        console.log(gy);
         e.preventDefault();
-        $(this).hide();
-        $('#card_description').show();
+        console.log('Create Card');
+        $.ajax({
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            method: 'POST'
+        }).done(function(data){
+            console.log(data.card);
+            var card_template = `
+                                <li class="list-unstyled m-0">
+                                <a href="" data-toggle="modal" data-remote="/description/${data.id}" data-target="#modal-card">
+                                <h4 class="addcard w-100" data-id="${data.id}" id="card">
+                                    ${data.card}
+                                <button class="btn float-right" id="description">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </button>
+                                </h4>
+                                </a>
+                                </li>
+                                `;
+            
+                                
+            $(card_template).insertBefore('.create-card');
+            $('.create-card').trigger('reset');
+        }).fail(function(err){
+            console.log('error');
+        });
+    });
+}
+
+
+
+function archiveBoard(){
+    $('#board-archive').on('click', function(e){
+        e.preventDefault();
+        console.log('Archive Boatd');
+        $.ajax({
+            url: $(this).attr('href'),
+            method: 'get'
+        }).done(function(res){
+            console.log(res);
+            window.location.href = '/dashboard/';
+        }).fail(function(err){
+            console.log(err);
+        })
     })
 }
 
@@ -144,23 +221,74 @@ function archiveList(){
             method: 'get',
         }).done(function(res){
             console.log('GUGU');
-            $(this).parent().parent().parent().parent().remove();
+            $(this).parents('.card').remove();
             
+        }).fail(function(err){
+            console.log(err);
         });
     });
 }
 
+function archiveCard(){
+    $('#archive-card').on('click', function(e){
+        console.log('CLOSE');
+        e.preventDefault();
+        var archive = $(this).data('id');
+        console.log(archive);
+        $.ajax({
+            url: '/card-archive/'+archive,
+            method: 'get'
+        }).done(function(res){
+            e.preventDefault();
+            $('li').find('h4').remove();
+            $('#modal-card').close();
+        }).fail(function(err){
+            console.log(err)
+        });
+    });
+}
+
+function createCardDescription(){
+    $('.card').on('click', function(e){
+        $('.card2').hide();
+        $('#add-card-description').show();
+        console.log('Description');
+        addCardDescription();
+    })
+}
+
+function addCardDescription(){
+    console.log('FUnc');
+    $('#card-description').on('submit', function(e){
+        console.log('Add Card Description');
+        e.preventDefault();
+        $.ajax({
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            method: 'POST'
+        }).done(function(data){
+            $('.card2').show();
+            $('body').find('.card2').html(data.card_description);
+            console.log(data.card_description);
+            $('#add-card-description').hide();
+        }).fail(function(err){
+            console.log(err);
+        });
+    })
+}
 
 $(document).ready(function (){
     archieveView();
     editBoard();
     editList();
     editCard();
-    cardDescription();
+    archiveBoard();
     archiveList();
-    var i = 0;
+    createCard();
+    createCardDescription();
 
     $('#list-form').on('submit', function(e){
+        
         console.log('CREATE LIST');
         e.preventDefault();
         $.ajax({
@@ -183,12 +311,15 @@ $(document).ready(function (){
                         </div>
                         </div>
                         <div class="card-body pb-0">
+                       
+                        <form class="create-card" method="POST" action="/board/${data.id}/list/">
+                            <input type="text" name="card_title" placeholder="+ Add Card">
+                        </form>
                         </div>
                         </form>
                         </div>
                         </div>
-                        `;
-            console.log(i);        
+                        `;  
             archiveList();  
 
             $('#list-board').append(template);
@@ -198,7 +329,6 @@ $(document).ready(function (){
         });
         return false;
     });
-
 
 
     $('#modal-card').on('shown.bs.modal', function (e) {
@@ -213,7 +343,7 @@ $(document).ready(function (){
     });
 
     $('#modal-id').on('shown.bs.modal', function (e) {
-        console.log('Boardsie')
+        console.log('Boardsiesder')
         var remoteUrl = $(e.relatedTarget).data('remote');
         console.log(remoteUrl);
         var modal = $(this);
