@@ -8,7 +8,7 @@
                         ...
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="text-dark ml-5" href="{% url 'board-archive' board.id %}">Archive</a>
+                        <a class="text-dark ml-5" id="board-archive" href="{% url 'board-archive' board.id %}">Archive</a>
                     </div>
                 </div>
                 <h2 class="mt-4 ml-2 pl-2 pr-5" id="board_container" value="{{ board.title }}">
@@ -81,6 +81,24 @@
                             </div>
                         </div>
                         <div class="card-body pb-0">
+                            {% for card in list.card_set.all %}
+                                {% if card.archived == False %}
+                                    <li class="list-unstyled m-0">
+                                        <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
+                                            <h4 class="addcard w-100" id="card">
+                                                {{ card }}
+                                                <button class="btn float-right" id="description">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                            </h4>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            <form class="create-card" method="POST" action="{% url 'add-card' list.id %}">
+                                {% csrf_token %}
+                                <input type="text" name="card_title" placeholder="+ Add Card">
+                            </form>
                         </div>
                     </div>
                 {% endif %}
@@ -122,7 +140,7 @@
                                     </ul>
                                 {% endif %}
                             {% endfor %}
-                            <form class="w-100 mt-3" id="list-form" action="{% url 'add_card' id=list.id %}" method="POST">
+                            <form class="w-100 mt-3" id="list-form" action="{% url 'add-card' id=list.id %}" method="POST">
                                 {% csrf_token %}
                                 <div class="form-group">
                                     {{ card_form.card_title}}
