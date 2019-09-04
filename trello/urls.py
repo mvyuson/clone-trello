@@ -11,6 +11,7 @@ from trello.views import (
         AddCardView,
         CardDescriptionView,
         AddCardDescriptionView,
+        CardDragAndDropView,
         UpdateBoard,
         UpdateListView,
         DeleteBoardView,
@@ -21,6 +22,7 @@ from trello.views import (
         ListArchiveView,
         CardArchiveView,
         InviteMemberView,
+        LeaveBoardView,
 )
 from .models import Board
 from django.urls import path
@@ -39,8 +41,10 @@ urlpatterns = [
     path('board/<int:id>/', BoardView.as_view(), name='board'),
     path('board/<int:id>/list/', AddCardView.as_view(), name='add-card'),
     path('invite-member/<int:id>/', InviteMemberView.as_view(), name='invite-member'),
+    path('leave-board/<int:id>/', LeaveBoardView.as_view(), name='leave-board'),
     path('description/<int:id>/', CardDescriptionView.as_view(), name='description'),
     path('description/<int:id>/add-card-description', AddCardDescriptionView.as_view(), name='add-card-description'),
+    path('drag-and-drop/<int:id>/', CardDragAndDropView.as_view(), name='drag-and-drop'),
 
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
     path('edit-list/<int:id>/', UpdateListView.as_view(), name='edit-list'),
