@@ -242,7 +242,6 @@ class CardDescriptionView(TemplateView):
 
 
 class AddCardDescriptionView(TemplateView):
-
     def post(self, *args, **kwargs):
         description = self.request.POST.get('card_description')
         card = get_object_or_404(Card, id=kwargs.get('id'))
@@ -252,6 +251,22 @@ class AddCardDescriptionView(TemplateView):
         current_description.save()
         return JsonResponse({'card_description':current_description.card_description})
 
+
+class CardDragAndDropView(View):
+    def post (self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        drop_list = self.request.POST.get('blist')
+        print(drop_list)
+        card = self.request.POST.get('card')
+        print(card)
+        drop_card = get_object_or_404(Card, id=kwargs.get('id'))
+        print(drop_card)
+        current_card = Card.objects.get(id=card)
+        current_list = List.objects.get(id=drop_list)
+        current_card.board_list = current_list
+        print(current_card.board_list)
+        current_card.save()
+        return JsonResponse({'card':current_card.id})
 
 class UpdateBoard(TemplateView):
     def post(self, *args, **kwargs):
@@ -305,6 +320,15 @@ class BoardArchiveView(View):
         board.save()
         return JsonResponse({'board':board.id})
 
+
+class LeaveBoardView(View):
+    def get(self, *args, **kwargs):
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        member = self.request.user 
+        board_member = BoardMembers.objects.get(board=board)
+        board_member.remove(self.request.user)
+        board_member.save()
+        return JsonResponse({'board_member':board_member.id})
 
 class ListArchiveView(View):
     def get(self, *args, **kwargs):
