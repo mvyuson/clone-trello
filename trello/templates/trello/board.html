@@ -24,9 +24,20 @@
                     </div>
                 </form> -->
             </div>
-            <div class="col mt-4">
+            <div class="col">
                 {% for member in board_members %}
-                    {{ member.members.username }}
+                    <div class="dropdown mt-3" id="invite_dropdown">
+                        <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ member.members.username }}
+                        </button>
+                        <div class="dropdown-menu p-3" id="inviteDropdownMenu" aria-labelledby="dropdownMenuButton">
+                            <h4 class="mb-0">{{ member.members.username }}</h4>
+                            <small class="mt-0">{{ member.members.email }}</small>
+                            <button class="btn w-100 mt-3" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <a id="leave-board" href="{% url 'leave-board' board.id %}" class="float-left text-dark">Leave Board</a>
+                            </button>
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
             <div class="col">
@@ -83,19 +94,21 @@
                         <div class="card-body pb-0">
                             {% for card in list.card_set.all %}
                                 {% if card.archived == False %}
-                                    <li class="list-unstyled m-0">
-                                        <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
-                                            <h4 class="addcard w-100" id="card">
-                                                {{ card }}
-                                                <button class="btn float-right" id="description">
-                                                    <span class="glyphicon glyphicon-pencil"></span>
-                                                </button>
-                                            </h4>
+                                    <li class="list-unstyled m-0" draggable="true" data-id="{{ card.id }}">
+                                        <a href="{% url 'drag-and-drop' card.id %}">
+                                            <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
+                                                <h4 class="addcard w-100" id="card">
+                                                    {{ card }}
+                                                    <button class="btn float-right" id="description">
+                                                        <span class="glyphicon glyphicon-pencil"></span>
+                                                    </button>
+                                                </h4>
+                                            </a>
                                         </a>
                                     </li>
                                 {% endif %}
                             {% endfor %}
-                            <form class="create-card" method="POST" action="{% url 'add-card' list.id %}">
+                            <form class="create-card mt-3" method="POST" draggable="false" action="{% url 'add-card' list.id %}">
                                 {% csrf_token %}
                                 <input type="text" name="card_title" placeholder="+ Add Card">
                             </form>
