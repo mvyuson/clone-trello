@@ -1,4 +1,5 @@
 {% load static %}
+{% load crispy_forms_tags %}
 <html>
     <head>
         <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}">
@@ -12,25 +13,16 @@
             <form method="POST" novalidate> 
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="form.username.label">{{ form.username.label }}</label>
-                    {{ form.username}}
-                    {{ form.username.errors}}
+                    {{ form.username|as_crispy_field }}
                 </div>
                 <div class="form-group">
-                    <label for="form.email.label">{{ form.email.label }}</label>
-                    {{ form.email}}
-                    {{ form.email.errors}}
+                    {{ form.email|as_crispy_field }}
                 </div>
                 <div class="form-group">
-                    <label for="form.password.label">{{ form.first_password.label }}</label>
-                    {{ form.first_password }}
-                    {{ form.first_password.errors}}
+                    {{ form.first_password|as_crispy_field }}
                 </div>
                 <div class="form-group">
-                    <label for="form.password.label">{{ form.second_password.label }}</label>
-                    {{ form.second_password }}
-                    {{ form.second_password.errors}}
-                </div>
+                    {{ form.second_password|as_crispy_field }}
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary mb-2">Sign Up</button>
                     <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
