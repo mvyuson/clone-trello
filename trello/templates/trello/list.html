@@ -7,7 +7,9 @@
         <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' id=b.id %}">{{ b.title }} </a></li></ul>
     {% endfor %}
     {% for boards in board_member %}
-        <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
+        {% if boards.deactivate == False %}
+            <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
+        {% endif %}
     {% endfor %}
 </div>
 {% endblock %}
