@@ -10,7 +10,9 @@ function cardDraggable(){
 
     $('.card-body').droppable({
         accepts: 'li', 
+        revert: 'false',
         drop: function(event, ui){
+            event.preventDefault();
             var list_id = $(this).prev().find('span').data('id');
             var card_id = $(ui.draggable).data("id");
 
@@ -29,6 +31,45 @@ function cardDraggable(){
         }
     });
 }
+
+function editList(){
+    $('.list-span').on('click', function(){
+        var editList = $(this).attr('contenteditable', 'true');
+        $(editList).attr('focus');
+        $('.list-span').on('keypress', function(e){
+            if(e.keyCode == '13'){
+                e.preventDefault();
+                var edit = $(this).text();
+                var list_id = $(this).data('id');
+                var list_con = $(`.list-content-${list_id}`); //unique list id
+                $(list_con).data('title', edit);
+                var this_url = $('.list-span').next().attr('href');
+                
+                console.log('Edit', edit);
+                console.log('List', list_id);
+                console.log('Url', this_url);
+
+                var update_list = $(list_con).data('title'); //updated value of list
+                var update_list_id = $(list_con).data('id');
+                console.log(update_list);
+
+
+                $.ajax({
+                    url: this_url,
+                    method: 'POST',
+                    data: {list_data: update_list, list_id: update_list_id}
+                }).done(function(data){
+                    console.log(data);
+                    $(editList).blur();
+                }).fail(function(err){
+                    console.log(err);
+                });
+                
+            }
+        });
+    })
+}
+
 
     
 function archieveView(){
@@ -97,51 +138,6 @@ function updateBoard(){
 }
 
 
-
-function editList(){
-    $('.list-span').on('click', function(e){
-        console.log('JJJJJJ')
-        $(this).hide();
-        $('#edit-list').show();
-
-    });
-}
-
-function updateList(template, list_id){
-    $('#edit-list-form').on('submit', function(e){
-        console.log("JOJOJO");
-        e.preventDefault();
-        $.ajax({
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            method: 'POST'
-        }).done(function(data){
-            e.preventDefault();
-            $('.list-span').show();
-            $('#edit-list').hide();
-            $('body').find('.list-span').html(data.board_list)
-            console.log(data);
-        })
-    });
-}
-
-// function editList(){
-//     $('h3').on('click', function(e){
-//         e.preventDefault();
-//         console.log('Edit sassList');
-//         $('#input-list').show();
-//         $(this).hide();
-//         updateList();
-//     });
-// }
-
-// function updateList(){
-//     $('#input-list').on('submit', function(e){
-//         $(this).hide();
-//         $('h3').show()
-//     })
-// }
-
 function editCard(){
     $('.card-title-description').on('click', function(e){
         e.preventDefault();
@@ -192,9 +188,11 @@ function createBoard() {
     });
 }
 
-function createCard(list_id){
+function createCard(){
     $('.create-card').on('submit', function(e){
         var gy = $(this).attr('action');
+        var parent_list = $(this).parents('.card').data('id');
+        console.log('PARENT', parent_list)
         console.log(gy);
         e.preventDefault();
         console.log('Create Card');
@@ -205,7 +203,7 @@ function createCard(list_id){
         }).done(function(data){
             console.log(data.card);
             var card_template = `
-                                <li class="list-unstyled" data-id="${data.id}">
+                                <li class="list-unstyled m-0 ui-sortable-handle ui-draggable ui-draggable-handle" droppable="true" draggable="true" data-id="${data.id}">
                                 <a href="/drag-and-drop/${data.id}/">
                                 <a href="" data-toggle="modal" data-remote="/description/${data.id}" data-target="#modal-card">
                                 <h4 class="addcard w-100" data-id="${data.id}" id="card">
@@ -219,12 +217,8 @@ function createCard(list_id){
                                 </li>
                                 `;
             
-            var listContent = $(`.list-content-${list_id}`);
-            console.log(list_id); //list_id is undefined
-            console.log('kokoo', $(`.list-content-${list_id}`));
-            $(listContent).find('.create-card').append(card_template);
-            // $('.create-card').before(card_template);                   
-            // $(card_template).insertBefore('.create-card');
+            var listContent = $(`.list-content-${parent_list}`);
+            $(listContent).find('.create-card').before(card_template);
             $('.create-card').trigger('reset');
         }).fail(function(err){
             console.log('error');
@@ -234,6 +228,7 @@ function createCard(list_id){
 
 function leaveBoard(){
     $('#leave-board').on('click', function(e){
+        console.log('Leave')
         e.preventDefault();
         $.ajax({
             url: $(this).attr('href'),
@@ -242,8 +237,8 @@ function leaveBoard(){
             window.location.href = '/dashboard/';
         }).fail(function(err){
             console.log(err);
-        })
-    })
+        });
+    });
 }
 
 function archiveBoard(){
@@ -258,8 +253,8 @@ function archiveBoard(){
             window.location.href = '/dashboard/';
         }).fail(function(err){
             console.log(err);
-        })
-    })
+        });
+    });
 }
 
 function archiveList(){
@@ -328,38 +323,33 @@ function addCardDescription(){
 }
 
 
-
 $(document).ready(function (){
-    // var list_id = data.id;
-    var list_id; 
-    console.log('Global', list_id);
-
+    console.log('KAKAKA')
     archieveView();
     editBoard();
     editList();
     editCard();
     archiveBoard();
     archiveList();
-    createCard(list_id);
+    createCard();
     createCardDescription();
     cardDraggable();
     leaveBoard();
 
     $('#list-form').on('submit', function(e){
-        
-        console.log('CREATE LIST');
+        console.log('CREATE LIST LISTer');
         e.preventDefault();
         $.ajax({
             url: $(this).attr('action'),
             data: $(this).serialize(),
             method: 'POST'
         }).done(function(data){
-            list_id = data.id;
-            window.list_id= list_id;
+            console.log(data.id);
             var template = `
-                        <div class="card p-1 ml-4 mt-5 list-content-${data.id}">
+                        <div class="card p-1 ml-4 mt-5 list-content-${data.id}" data-id=${data.id}>
                         <div class="card-title pt-3 pb-0 d-flex justify-content-between">
-                        <span class="list-span" data-id="${data.id}">${data.board_list}</span> 
+                        <span class="list-span" value="${data.board_list}" contenteditable="true" data-title="${data.board_list}" data-id="${data.id}">${data.board_list}</span> 
+                        <a href="/edit-list/${data.id}/"></a>
                         <div class="dropdown p-0 float-right" id="list-dropdown">
                         <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             ...
@@ -401,7 +391,7 @@ $(document).ready(function (){
     });
 
     $('#modal-id').on('shown.bs.modal', function (e) {
-        console.log('Boardsiesder Koo')
+        console.log('Boardsiesder KooKoo')
         var remoteUrl = $(e.relatedTarget).data('remote');
         console.log(remoteUrl);
         var modal = $(this);
