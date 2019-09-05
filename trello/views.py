@@ -4,14 +4,16 @@ from django.template.loader import render_to_string
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib.auth.models import User
+
 
 from .forms import (
     SignUpForm, 
@@ -166,9 +168,8 @@ class CreateBoardView(TemplateView):
 
 class BoardView(TemplateView):
     """
-    Display the current board title by calling its id
-
-    Get the current Board
+    Display the board details by returning the board, board_members, and other forms to the template.
+    Get the current Board and save the newly added list
     """
 
     template_name = 'trello/board.html'
@@ -206,7 +207,9 @@ class BoardView(TemplateView):
 
 
 class AddCardView(TemplateView):
-
+    """
+    Add a newly created card.
+    """
     def post(self, request, *args, **kwargs):
         #import pdb; pdb.set_trace()
         if self.request.POST.get('card_title'):
@@ -215,16 +218,14 @@ class AddCardView(TemplateView):
             card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
             card.save()
             return JsonResponse({'card':card.card_title, 'id':card.id})
-            
-            # card = Card.objects.get(board_list=card_list) #get() returned more than one Card -- it returned 13!
-            # card.author = self.request.user
-            # card.save()
-            # return JsonResponse({'card':card.card_title})
 
 
 class CardDescriptionView(TemplateView):
+    """
+    Display the card detail of a card inside the modal.
+    """
+
     template_name = 'trello/description.html'
-    form = AddCardDescriptionForm
 
     def get(self, *args, **kwargs):
         card = get_object_or_404(Card, id=kwargs.get('id'))
@@ -242,6 +243,9 @@ class CardDescriptionView(TemplateView):
 
 
 class AddCardDescriptionView(TemplateView):
+    """
+    Add and update card description.
+    """
     def post(self, *args, **kwargs):
         description = self.request.POST.get('card_description')
         card = get_object_or_404(Card, id=kwargs.get('id'))
@@ -253,22 +257,25 @@ class AddCardDescriptionView(TemplateView):
 
 
 class CardDragAndDropView(View):
+    """
+    Drag and drop card to a list and update it's list.
+    """
     def post (self, *args, **kwargs):
         #import pdb; pdb.set_trace()
         drop_list = self.request.POST.get('blist')
-        print(drop_list)
         card = self.request.POST.get('card')
-        print(card)
         drop_card = get_object_or_404(Card, id=kwargs.get('id'))
-        print(drop_card)
         current_card = Card.objects.get(id=card)
         current_list = List.objects.get(id=drop_list)
         current_card.board_list = current_list
-        print(current_card.board_list)
         current_card.save()
         return JsonResponse({'card':current_card.id})
 
+
 class UpdateBoard(TemplateView):
+    """
+    Update the value of the board title.
+    """
     def post(self, *args, **kwargs):
         update_board = self.request.POST.get('board_title') 
         board = get_object_or_404(Board, id=kwargs.get('id'))
@@ -279,18 +286,30 @@ class UpdateBoard(TemplateView):
 
 
 class UpdateListView(TemplateView):
+    """
+    Update the value of the list title.
+    1. Get the new list value from the frontend.
+    2. Get the id of the edited list.
+    3. Get the id passed by the url
+    4. Update List and save.
+    """
+
     def post(self, *args, **kwargs):
-        update_list = self.request.POST.get('list_title')
-        print(update_list)
-        board_list = get_object_or_404(List, id=kwargs.get('id')) #mali
-        current_list = List.objects.get(id=board_list.id)
-        current_list.list_title = update_list
-        current_list.save()
-        print(current_list.list_title, 'KOKOKOKO')
-        return JsonResponse({'board_list':current_list.list_title})
+        edit_list = self.request.POST.get('list_data')     
+        list_id = self.request.POST.get('list_id')      
+        current_list = get_object_or_404(List, id=kwargs.get('id')) 
+        update_list = List.objects.get(id=list_id)
+        update_list.list_title = edit_list
+        print(update_list.list_title)
+        update_list.save()
+        return JsonResponse({'board_list':update_list.id})
 
 
 class DeleteBoardView(DeleteView):
+    """
+    Delete Board.
+    """
+    
     def get(self, *args, **kwargs):
         board_to_delete = get_object_or_404(Board, id=kwargs.get('id'))
         board_to_delete.delete()
@@ -298,6 +317,10 @@ class DeleteBoardView(DeleteView):
 
 
 class DeleteListView(DeleteView):
+    """
+    Delete List.
+    """
+    
     def get(self, *args, **kwargs):
         list_to_delete = get_object_or_404(List, id=kwargs.get('id'))
         board = list_to_delete.board.id
@@ -306,6 +329,10 @@ class DeleteListView(DeleteView):
 
 
 class DeleteCardView(DeleteView):
+    """
+    Delete Card.
+    """
+
     def get(self, *args, **kwargs):
         card_to_delete = get_object_or_404(Card, id=kwargs.get('id'))
         board = card_to_delete.board_list.board.id 
@@ -323,10 +350,11 @@ class BoardArchiveView(View):
 
 class LeaveBoardView(View):
     def get(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        print(self.request.user)
         board = get_object_or_404(Board, id=kwargs.get('id'))
-        member = self.request.user 
-        board_member = BoardMembers.objects.get(board=board)
-        board_member.remove(self.request.user)
+        board_member = BoardMembers.objects.get(board=board, members=self.request.user)
+        board_member.deactivate = True
         board_member.save()
         return JsonResponse({'board_member':board_member.id})
 
@@ -370,7 +398,9 @@ class InviteMemberView(TemplateView):
             member = form.save(commit=False)
             member.board = get_object_or_404(Board, id=kwargs.get('id'))
             member.deactivate = False
-            member.owner = True
+            if self.request.user:
+                member.owner = True
+                member.save()
             member.save()
             return redirect('board', board.id)
         return render(self.request, self.template_name, {'form':form})  
