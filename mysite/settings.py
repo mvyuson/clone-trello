@@ -30,8 +30,11 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 INSTALLED_APPS = [
     'trello',
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +45,12 @@ INSTALLED_APPS = [
 
 ROLEPERMISSIONS_REGISTER_ADMIN = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_USE_TLS = True 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'minetteverap.yuson@gmail.com'
+EMAIL_HOST_PASSWORD = 'alanxnpmupfpbpsr'
+DEFAULT_FROM_EMAIL = 'TrelloCloneApp'
+EMAIL_PORT = 587
 
 
 MIDDLEWARE = [
