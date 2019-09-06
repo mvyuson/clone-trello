@@ -28,7 +28,7 @@ from .models import Board
 from django.urls import path
 
 urlpatterns = [  
-    path('signup/', SignUpView.as_view(), name='signup'),
+    path('', SignUpView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('password_reset/', auth_views.password_reset, name='password_reset'),
     path('password_reset_done/', auth_views.password_reset_done, name='password_reset_done'),
@@ -49,9 +49,9 @@ urlpatterns = [
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
     path('edit-list/<int:id>/', UpdateListView.as_view(), name='edit-list'),
 
-    path('board/<int:id>/delete-board/', DeleteBoardView.as_view(), name='delete-board'),
-    path('delete-list/<int:id>/', DeleteListView.as_view(), name='delete-list'),
+    path('archive/delete-list/<int:id>/', DeleteListView.as_view(), name='delete-list'),
     path('delete-card/<int:id>/', DeleteCardView.as_view(), name='delete-card'),
+    path('board/<int:id>/delete-board/', DeleteBoardView.as_view(), name='delete-board'),
 
     path('archive/', ArchiveView.as_view(), name='archive'),
     path('board-archive/<int:id>/', BoardArchiveView.as_view(), name='board-archive'),
