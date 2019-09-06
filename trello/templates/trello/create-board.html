@@ -1,6 +1,14 @@
-<form id="board-form" method="POST" action="{% url 'create-board' %}" novalidate>
-    <span class="error" style="display:none;">This field is required.</span>
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Save</button>
-</form>
+{% extends 'trello/static_files.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="con pl-4 pr-4">
+        <form id="board-form" method="POST" action="{% url 'create-board' %}" novalidate>
+            <span class="error" style="display:none;">This field is required.</span>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button class="btn btn-warning w-100" type="submit">Save</button>
+        </form>
+    </div>
+{% endblock %}
