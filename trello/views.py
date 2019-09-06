@@ -29,6 +29,12 @@ from .models import Card, List, Board, BoardMembers
 import json
 
 
+"""
+REMINDER: THE APP MUST NOT ACCEPT AND RETURN BLANK VALUES WHEN UPDATING.
+          UPDATE CARD AND CREATE CARD DESCRIPTION MUST HAVE THE SAME VIEW
+          FUNCTION.
+"""
+
 class SignUpView(TemplateView):
     """
     View for the signup.
@@ -67,7 +73,6 @@ class LoginView(TemplateView):
     
     form = LoginForm
     template_name = 'trello/login.html'
-    #import pdb; pdb.set_trace()
 
     """
     Render login form to login page.
@@ -182,7 +187,6 @@ class BoardView(TemplateView):
         """
         Get the kwargs of board_list
         """
-        #import pdb; pdb.set_trace()
 
         board = get_object_or_404(Board, id=kwargs.get("id")) 
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
@@ -210,8 +214,8 @@ class AddCardView(TemplateView):
     """
     Add a newly created card.
     """
+
     def post(self, request, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         if self.request.POST.get('card_title'):
             card_list = get_object_or_404(List, id=kwargs.get('id'))
             title = self.request.POST.get('card_title')
@@ -233,7 +237,6 @@ class CardDescriptionView(TemplateView):
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         update_card = self.request.POST.get('card_title')
         card = get_object_or_404(Card, id=kwargs.get('id'))
         current_card = Card.objects.get(id=card.id)
@@ -259,9 +262,14 @@ class AddCardDescriptionView(TemplateView):
 class CardDragAndDropView(View):
     """
     Drag and drop card to a list and update it's list.
+    1. Get the value of the dragged and dropped card, and the value of 
+       the list it was dropped.
+    2. Set the new list value of card with the value of the list it was
+       dropped.
+    3. Save.
     """
+
     def post (self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         drop_list = self.request.POST.get('blist')
         card = self.request.POST.get('card')
         drop_card = get_object_or_404(Card, id=kwargs.get('id'))
@@ -275,7 +283,10 @@ class CardDragAndDropView(View):
 class UpdateBoard(TemplateView):
     """
     Update the value of the board title.
+    1. Get the new value of the current board.
+    2. Update the new value of the current board
     """
+
     def post(self, *args, **kwargs):
         update_board = self.request.POST.get('board_title') 
         board = get_object_or_404(Board, id=kwargs.get('id'))
@@ -307,7 +318,7 @@ class UpdateListView(TemplateView):
 
 class DeleteBoardView(DeleteView):
     """
-    Delete Board.
+    Delete the current Board.
     """
     
     def get(self, *args, **kwargs):
@@ -318,7 +329,7 @@ class DeleteBoardView(DeleteView):
 
 class DeleteListView(DeleteView):
     """
-    Delete List.
+    Delete the current List.
     """
     
     def get(self, *args, **kwargs):
@@ -330,7 +341,7 @@ class DeleteListView(DeleteView):
 
 class DeleteCardView(DeleteView):
     """
-    Delete Card.
+    Delete the current Card.
     """
 
     def get(self, *args, **kwargs):
@@ -341,6 +352,10 @@ class DeleteCardView(DeleteView):
 
 
 class BoardArchiveView(View):
+    """
+    Archive Board by setting its archived field into True.
+    """
+
     def get(self, *args, **kwargs):
         board = get_object_or_404(Board, id=kwargs.get('id'))
         board.archived = True 
@@ -348,17 +363,11 @@ class BoardArchiveView(View):
         return JsonResponse({'board':board.id})
 
 
-class LeaveBoardView(View):
-    def get(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        print(self.request.user)
-        board = get_object_or_404(Board, id=kwargs.get('id'))
-        board_member = BoardMembers.objects.get(board=board, members=self.request.user)
-        board_member.deactivate = True
-        board_member.save()
-        return JsonResponse({'board_member':board_member.id})
-
 class ListArchiveView(View):
+    """
+    Archive List by setting its archived field into True.
+    """
+
     def get(self, *args, **kwargs):
         board_list = get_object_or_404(List, id=kwargs.get('id'))
         board_list.archived = True 
@@ -367,6 +376,10 @@ class ListArchiveView(View):
 
 
 class CardArchiveView(View):
+    """
+    Archive Card by setting its archived field into True.
+    """
+
     def get(self, *args, **kwargs):
         card = get_object_or_404(Card, id=kwargs.get('id'))
         card.archived = True 
@@ -375,6 +388,16 @@ class CardArchiveView(View):
 
 
 class ArchiveView(TemplateView):
+    """
+    Display the archive boards, lists, and cards in one template order by the date it was created.
+    1. Get all the boards with the current user as the author, and if archived is equal to true, order
+       by the date it was created.
+    2. Get all the lists with the current user as the author, and if archived is equal to true, order
+       by the date it was created.
+    3. Get all the cards with the current user as the author, and if archived is equal to true, order
+       by the date it was created.
+    """
+
     template_name = 'trello/board_archive.html'
 
     def get(self, *args, **kwargs):
@@ -386,6 +409,14 @@ class ArchiveView(TemplateView):
 
 
 class InviteMemberView(TemplateView):
+    """
+    Invite other user as a member of the board. The user will enter the username of the member
+    and submit it. Then activate its membership. Then set the current user as the owner of the 
+    board. Then redirect it to Board Details.
+
+    REMINDER: Convert it into AJAX 
+    """
+
     template_name = 'trello/board.html'
     form = InviteMemberForm
 
@@ -404,3 +435,17 @@ class InviteMemberView(TemplateView):
             member.save()
             return redirect('board', board.id)
         return render(self.request, self.template_name, {'form':form})  
+
+
+class LeaveBoardView(View):
+    """
+    Let the user who is a member of the board to leave by setting the deactivating its membership.
+    """
+
+    def get(self, *args, **kwargs):
+        print(self.request.user)
+        board = get_object_or_404(Board, id=kwargs.get('id'))
+        board_member = BoardMembers.objects.get(board=board, members=self.request.user)
+        board_member.deactivate = True
+        board_member.save()
+        return JsonResponse({'board_member':board_member.id})
