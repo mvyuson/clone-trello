@@ -7,10 +7,15 @@
             {{ user.email }}
         </div>
     </div>
-    <div class="header-board">
+    <div class="header-board pr-0">
         <a class="mr-3 float-left" href="{% url 'dashboard' %}">Boards</a>
         <button class="btn p-0" id="archive"><span class="text-white">Archive</span></button>
     </div>
-    <a class="p-0 mr-3"id="logout" href="{% url 'logout' %}">Logout</a>
-    <button class="btn" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span id='add-board'>Create Board</span></button>
+    <div class="container d-flex justify-content-between ml-0 pl-5 pb-0 pt-0" id="trello-header">
+        <h3 class="text-white p-0"><em>Trello</em></h3>
+    </div>
+    <div class="side" id="logout">
+        <a class="p-0 mt-3 mr-3" href="{% url 'logout' %}">Logout</a>
+        <button class="btn p-0" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span class="p-0" id='add-board'><b>+</b></span></button>
+    </div>
 </div>
