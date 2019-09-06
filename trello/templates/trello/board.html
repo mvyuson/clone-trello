@@ -1,7 +1,7 @@
 {% extends 'trello/base.html' %}
 {% block content %}
-    <header>
-        <div class="row">
+    <header class="board-header">
+        <div class="row board-row">
             <div class="col-5 d-flex justify-content-start mt-0 p-0 mb-5" id="board-title">
                 <div class="dropdown ml-5 mt-2 p-0 float-right" id="board-dropdown">
                     <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -58,7 +58,7 @@
         </div>
     </header>
     <body>
-        <div class="container float-left ml-5" id="list-container">
+        <div class="container float-left ml-5 mt-2" id="list-container">
             <form id="list-form" action="{% url 'board' board.id %}" method="POST">
                 {% csrf_token %}
                 {{ form.list_title}}
@@ -70,7 +70,7 @@
                 {% if list.archived == False %}
                     <div class="card p-1 ml-4 mt-5 list-content-{{ list.id }}" data-title="{{ list }}" data-id="{{ list.id }}">
                         <div class="card-title pt-3 pb-0 d-flex justify-content-between">
-                            <span class="list-span" value="{{ list }}" data-title="{{ list }}" data-id="{{ list.id }}">{{ list }}</span>
+                            <span class="list-span" value="{{ list }}" data-title="{{ list }}" data-id="{{ list.id }}"><b>{{ list }}</b></span>
                             <a href="{% url 'edit-list' list.id %}"></a>
                             
                             <div class="dropdown p-0 float-right" id="list-dropdown">
@@ -101,7 +101,7 @@
                             {% endfor %}
                             <form class="create-card mt-3" method="POST" draggable="false" action="{% url 'add-card' list.id %}">
                                 {% csrf_token %}
-                                <input type="text" name="card_title" placeholder="+ Add Card">
+                                <input type="text" class="input-card" name="card_title" placeholder="+ Add Card">
                             </form>
                         </div>
                     </div>
