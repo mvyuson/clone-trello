@@ -1,4 +1,5 @@
 {% extends 'trello/static_files.html' %}
+
 {% block content %}
 <header>
     <h2 id="card_container">
@@ -7,7 +8,6 @@
             <input id="updateCardForm" type="text" value="{{ card.card_title }}" name="card_title" style="display:none;">
         </form>
     </h2>
-    
     <p>in list {{ card.board_list }}</p>
 </header>
 <body>
@@ -17,8 +17,11 @@
                 <h4>Description</h4>
                 <div class="card">
                     <div class="card2">
-                        <p id="desc">Add more detailed description...</p>
-                        {{ card.card_description }}
+                        {% if not card.card_description %}
+                            <p id="desc">Add more detailed description...</p>
+                        {% else %}
+                            {{ card.card_description }}
+                        {% endif %}
                     </div>
                 </div>
                 <form id="card-description" method="POST" action="{% url 'add-card-description' card.id %}">
@@ -26,17 +29,6 @@
                     <textarea id="add-card-description" name="card_description" value="{{ card.card_description }}" placeholder="{{ card.card_description }}" style="display:none;">{{ card.card_description }}</textarea> <br>
                     <button id="save-button" type="submit" class="btn btn-success mb-3">Save</button><br>
                 </form>
-                
-                <!-- <form class="description-form" id="card_description_edit" action="{% url 'add-card-description' card.id %}" method="POST">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        {{ form.card_description}}
-                    </div>
-                    <button type="submit" class="btn btn-success mb-3">Save</button><br>
-                </form>
-                <div class="container" id="card_description">
-                    <p>{{ card_description.card_description }}</p>
-                </div> -->
             </div>
             <div class="activity">
                 <div class="row">
@@ -57,6 +49,4 @@
         </div>
     </div>
 </body>
-
 {% endblock %}
-
