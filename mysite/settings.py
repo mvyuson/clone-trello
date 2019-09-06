@@ -47,8 +47,8 @@ ROLEPERMISSIONS_REGISTER_ADMIN = True
 
 EMAIL_USE_TLS = True 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'minetteverap.yuson@gmail.com'
-EMAIL_HOST_PASSWORD = 'alanxnpmupfpbpsr'
+EMAIL_HOST_USER = 'trellodmn@gmail.com'
+EMAIL_HOST_PASSWORD = 'sswrptvyhxuhndyl'
 DEFAULT_FROM_EMAIL = 'TrelloCloneApp'
 EMAIL_PORT = 587
 
