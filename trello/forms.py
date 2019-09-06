@@ -3,6 +3,7 @@ from .models import Board, List, Card, BoardMembers
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+
 class SignUpForm(forms.ModelForm):
     """
     Creates form for Sign Up. 
@@ -18,6 +19,9 @@ class SignUpForm(forms.ModelForm):
         fields = ('username', 'email', 'first_password', 'second_password')
 
     def clean_email(self):
+        """
+        Check if email was already taken.
+        """
         email = self.cleaned_data['email']
         user = User.objects.filter(email=email)
         if user.exists():
@@ -25,6 +29,9 @@ class SignUpForm(forms.ModelForm):
         return email
     
     def clean(self):
+        """
+        Check if passwords match.
+        """
         cleaned_data = super().clean()
         first_password = cleaned_data.get("first_password")
         second_password = cleaned_data.get("second_password")
@@ -47,6 +54,9 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     def clean_username(self):
+        """
+        Check if the username entered exitst.
+        """
         username = self.cleaned_data['username']
         user = User.objects.filter(username=username)
         if user.exists():
@@ -58,12 +68,18 @@ class LoginForm(forms.Form):
 
 
 class AddBoardTitleForm(forms.ModelForm):
+    """
+    Create Board form.
+    """
     class Meta:
         model = Board
         fields = ('title',)
 
 
 class AddListForm(forms.ModelForm):
+    """
+    Create List form.
+    """
     list_title = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add List'})
     )
@@ -74,6 +90,10 @@ class AddListForm(forms.ModelForm):
 
 
 class AddCardForm(forms.ModelForm):
+    """
+    Create Card form.
+    """
+
     card_title = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'})
     )
@@ -84,6 +104,10 @@ class AddCardForm(forms.ModelForm):
 
 
 class AddCardDescriptionForm(forms.ModelForm):
+    """
+    Create Card Description form.
+    """
+
     card_description = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'})
     )
@@ -94,6 +118,10 @@ class AddCardDescriptionForm(forms.ModelForm):
 
 
 class InviteMemberForm(forms.ModelForm):
+    """
+    Invite Member form.
+    """
+
     members = forms.ModelChoiceField(
         queryset=User.objects.all(), 
         required=False, 
