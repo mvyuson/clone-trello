@@ -44,12 +44,16 @@
                     <div class="dropdown-menu p-3" id="inviteDropdownMenu" aria-labelledby="dropdownMenuButton">
                         <h5>Invite to Board</h5>
                         <div class="invite-form">
-                            <form class="mt-3" action="{% url 'invite-member' board.id %}" method="POST">
+                            <!-- <form class="mt-3" action="{% url 'invite-member' board.id %}" method="POST">
                                 {% csrf_token %}
                                 <div class="form-group">
                                     {{ invite_form.members}}
                                     {{ invite_form.members.error }}
                                 </div>
+                            </form> -->
+                            <form class="mt-3" method="POST" action="{% url 'invite-member' board.id %}">
+                                {% csrf_token %}
+                                <input type="email" class="input-card" name="member_email" placeholder="Enter Member's Email">
                             </form>
                         </div>
                     </div>
