@@ -10,7 +10,6 @@ from trello.views import (
         CreateBoardView,
         AddCardView,
         CardDescriptionView,
-        AddCardDescriptionView,
         CardDragAndDropView,
         UpdateBoard,
         UpdateListView,
@@ -23,6 +22,9 @@ from trello.views import (
         CardArchiveView,
         InviteMemberView,
         LeaveBoardView,
+        RestoreArchivedBoard,
+        RestoreArchivedList,
+        RestoreArchivedCard,
 )
 from .models import Board
 from django.urls import path
@@ -43,7 +45,6 @@ urlpatterns = [
     path('invite-member/<int:id>/', InviteMemberView.as_view(), name='invite-member'),
     path('leave-board/<int:id>/', LeaveBoardView.as_view(), name='leave-board'),
     path('description/<int:id>/', CardDescriptionView.as_view(), name='description'),
-    path('description/<int:id>/add-card-description', AddCardDescriptionView.as_view(), name='add-card-description'),
     path('drag-and-drop/<int:id>/', CardDragAndDropView.as_view(), name='drag-and-drop'),
 
     path('board/<int:id>/edit-board/', UpdateBoard.as_view(), name='edit-board'),
@@ -57,4 +58,8 @@ urlpatterns = [
     path('board-archive/<int:id>/', BoardArchiveView.as_view(), name='board-archive'),
     path('list-archive/<int:id>/', ListArchiveView.as_view(), name='list-archive'),
     path('card-archive/<int:id>/', CardArchiveView.as_view(), name='card-archive'),
+    
+    path('board<int:id>/restore-board/', RestoreArchivedBoard.as_view(), name='restore-board'),
+    path('list<int:id>/restore-list/', RestoreArchivedList.as_view(), name='restore-list'),
+    path('card<int:id>/restore-card/', RestoreArchivedCard.as_view(), name='restore-card'),
 ]

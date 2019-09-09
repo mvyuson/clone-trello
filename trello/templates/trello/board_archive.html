@@ -7,8 +7,13 @@
                     {{ board.created_date }}: {{ board.title }}
                 </div>
                 <div class="col-1 pb-1 border-bottom">
-                    <a class="delete-board float-left  text-secondary" href="{% url 'delete-board' board.id %}">
+                    <a class="delete-board float-left  text-secondary pr-3" href="{% url 'delete-board' board.id %}">
                         <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+                    </a>
+                </div>
+                <div class="col-1 pb-1 pr-0 pl-3 border-bottom">
+                    <a class="restore-board text-secondary" href="{% url 'restore-board' board.id %}">
+                        <span class="glyphicon glyphicon-repeat mt-3"></span>
                     </a>
                 </div>
             </div>
@@ -29,6 +34,11 @@
                         <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
                     </a>
                 </div>
+                <div class="col-1 pb-1 pr-0 pl-3 border-bottom">
+                    <a class="restore-list text-secondary" href="{% url 'restore-list' list.id %}">
+                        <span class="glyphicon glyphicon-repeat mt-3"></span>
+                    </a>
+                </div>
             </div>
         </li>
     {% endfor %}
@@ -45,6 +55,11 @@
                 <div class="col-1 pb-1 border-bottom">
                     <a class="text-secondary" href="{% url 'delete-card' id=card.id %}">
                         <span class="glyphicon glyphicon-trash mt-3 ml-2">&nbsp</span>
+                    </a>
+                </div>
+                <div class="col-1 pb-1 pr-0 pl-3 border-bottom">
+                    <a class="restore-card text-secondary" href="{% url 'restore-card' card.id %}">
+                        <span class="glyphicon glyphicon-repeat mt-3"></span>
                     </a>
                 </div>
             </div>
