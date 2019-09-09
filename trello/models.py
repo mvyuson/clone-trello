@@ -19,7 +19,7 @@ class Card(models.Model):
     board_list = models.ForeignKey('List', on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     card_title = models.CharField(max_length=200)
-    card_description = models.TextField()
+    card_description = models.TextField(null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
@@ -78,3 +78,24 @@ class BoardMembers(models.Model):
     members = models.ForeignKey(User, on_delete=models.CASCADE)
     deactivate = models.BooleanField(default=True)
     owner = models.BooleanField(default=False)
+
+class BoardInvite(models.Model):
+    """
+    Stores the inivited user with no existing account here.
+    """
+
+    board_member = models.ForeignKey('BoardMembers', on_delete=models.CASCADE)
+    email_member = models.CharField(max_length=200)
+
+
+"""
+
+BoardInvite
+
+    accepted = False
+    board - Board A
+    email = 
+
+    get_user():
+        return User.objects.filter(email=email)
+"""
