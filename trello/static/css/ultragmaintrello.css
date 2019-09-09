@@ -32,6 +32,13 @@ body{
     font-size: 14px;
 }
 
+.input-member-email{
+    width: 245px;
+    padding-left: 8px;
+    margin-bottom: -5px;
+    font-size: 14px;
+}
+
 #trello-header{
     margin-top: -43px;
 }
