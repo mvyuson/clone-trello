@@ -4,7 +4,7 @@
 <header>
     <h2 id="card_container">
         <a class="card-title-description text-dark" href="">{{ card.card_title }}</a>
-        <form id="card-edit-form" method="POST" action="{% url 'description' card.id %}">
+        <form id="card-edit-form" method="POST" data-title="{{ card.card_title }}" action="{% url 'description' card.id %}">
             <input id="updateCardForm" type="text" value="{{ card.card_title }}" name="card_title" style="display:none;">
         </form>
     </h2>
@@ -24,10 +24,10 @@
                         {% endif %}
                     </div>
                 </div>
-                <form id="card-description" method="POST" action="{% url 'add-card-description' card.id %}">
+                <form id="card-description" method="POST" data-title="{{ card.card_title }}" action="{% url 'description' card.id %}">
                     {% csrf_token %}
                     <textarea id="add-card-description" name="card_description" value="{{ card.card_description }}" placeholder="{{ card.card_description }}" style="display:none;">{{ card.card_description }}</textarea> <br>
-                    <button id="save-button" type="submit" class="btn btn-success mb-3">Save</button><br>
+                    <button id="save-button" type="submit" class="btn btn-success mb-3" style="display: none;">Save</button><br>
                 </form>
             </div>
             <div class="activity">

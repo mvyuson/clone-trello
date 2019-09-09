@@ -113,6 +113,79 @@ function createCard(){
     });
 }
 
+
+function editCard(){
+    $(document).on('click', '.card-title-description', function(e){
+        e.preventDefault();
+        $(this).hide();
+        $('#updateCardForm').show();
+        updateCard();
+        mouseoutBoard();
+    })
+}
+
+function updateCard(){
+    $('#card-edit-form').on('submit', function(e){
+        e.preventDefault();
+
+        var title = $(this).find('input').val();
+        var description = $('#card-description').data('title');
+        console.log('card_title:', title, 'card_description: ', description);
+        $.ajax({
+            url: $(this).attr('action'),
+            data: {card_title: title, card_description: description},
+            method: 'POST'
+        }).done(function(data){
+            e.preventDefault();
+            $('.card-title-description').show();
+            $('header').find('.card-title-description').html(data.card);
+            console.log(data.board, data.card);
+            $.ajax({
+                url: '/board/'+data.board,
+                method: 'get'
+            }).done(function(res){
+                $('body').find('.card-body').find('h4').html(data.card);
+                console.log('board'+data.board);
+            })
+
+            $('#updateCardForm').hide();
+        });
+    });
+}
+
+function addCardDescription(){
+    $('#card-description').on('submit', function(e){
+        e.preventDefault();
+        var description = $(this).find('textarea').val();
+        var title= $(this).data('title');
+        console.log('card description', description, 'card: ', title);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            data: {card_title: title, card_description: description},
+            method: 'POST'
+        }).done(function(data){
+            $('.card2').show();
+            $('body').find('.card2').html(data.card_description);
+            $('#add-card-description').hide();
+            $('#save-button').hide();
+        }).fail(function(err){
+            console.log(err);
+        });
+    })
+}
+
+function createCardDescription(){
+    $('.card').on('click', function(e){
+        $('.card2').hide();
+        console.log('KOKOKOKO');
+        $('#add-card-description').show();
+        $('#save-button').show();
+        addCardDescription();
+        mouseoutBoard();
+    })
+}
+
 function cardDraggable(){
     $('.card-body').sortable({
         cancel: 'form'
@@ -234,6 +307,7 @@ function mouseoutBoard(){
 
         var con = $('#board-edit-form');
         var con2 = $('#card-edit-form');
+        var con3 = $('#card-description');
 
         if(!con.is(e.target) && con.has(e.target).length === 0){
             $('.board-title').show();
@@ -244,35 +318,13 @@ function mouseoutBoard(){
             $('.card-title-description').show();
             $('#updateCardForm').hide();
         }
+
+        if(!con3.is(e.target) && con3.has(e.target).length === 0){
+            $('.card2').show();
+            $('#add-card-description').hide();
+        }
     });
 }
-
-function editCard(){
-    $(document).on('click', '.card-title-description', function(e){
-        e.preventDefault();
-        $(this).hide();
-        $('#updateCardForm').show();
-        updateCard();
-        mouseoutBoard();
-    })
-}
-
-function updateCard(){
-    $('#card-edit-form').on('submit', function(e){
-        e.preventDefault();
-        $.ajax({
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            method: 'POST'
-        }).done(function(data){
-            e.preventDefault();
-            $('.card-title-description').show();
-            $('header').find('.card-title-description').html(data.card);
-            $('#updateCardForm').hide();
-        });
-    })
-}
-
 
 function createBoard() {
     $('#board-form').on('submit', function(e){
@@ -352,30 +404,4 @@ function archiveCard(){
             console.log(err)
         });
     });
-}
-
-function createCardDescription(){
-    $('.card').on('click', function(e){
-        $('.card2').hide();
-        $('#add-card-description').show();
-        addCardDescription();
-    })
-}
-
-function addCardDescription(){
-    $('#card-description').on('submit', function(e){
-        e.preventDefault();
-
-        $.ajax({
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            method: 'POST'
-        }).done(function(data){
-            $('.card2').show();
-            $('body').find('.card2').html(data.card_description);
-            $('#add-card-description').hide();
-        }).fail(function(err){
-            console.log(err);
-        });
-    })
 }
