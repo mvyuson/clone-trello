@@ -242,3 +242,12 @@ body{
 #card_description{
     display: none;
 }
+
+.update-error{
+    display: none; 
+    margin: auto; 
+    font-weight: normal; 
+    color:#FF0000; 
+    font-size: 12px;
+}
+
