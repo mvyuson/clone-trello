@@ -22,6 +22,7 @@ $(document).ready(function (){
             'url': remoteUrl
         }).done(function(response){
             modal.find('.modal-body').html(response);
+            archiveCard();
         });
     });
 
@@ -46,6 +47,10 @@ function createList(){
             method: 'POST'
         }).done(function(data){
             var template = `
+                        <div class="cc">
+                        <span id="cc-span">
+                        <p id="list-error" style="visibility:hidden; margin: auto; font-weight: normal; color:#FF0000; font-size: 12px;">Cannot accept empty list!.</p>
+                        </span>
                         <div class="card p-1 ml-4 mt-5 list-content-${data.id}" data-id=${data.id}>
                         <div class="card-title pt-3 pb-0 d-flex justify-content-between">
                         <span class="list-span" value="${data.board_list}" contenteditable="true" data-title="${data.board_list}" data-id="${data.id}"><b>${data.board_list}</b></span> 
@@ -68,9 +73,11 @@ function createList(){
                         </form>
                         </div>
                         </div>
+                        </div>
                         `;  
             $('#list-board').append(template);
             $('#list-form').trigger('reset');
+            createCard();
         }).fail(function(data){
             console.log("error")
         });
@@ -79,7 +86,7 @@ function createList(){
 }
 
 function createCard(){
-    $(document).on('submit', '.create-card', function(e){
+    $('.create-card').on('submit', function(e){
         e.preventDefault();
         var parent_list = $(this).parents('.card').data('id');
 
@@ -89,7 +96,7 @@ function createCard(){
             method: 'POST'
         }).done(function(data){
             var card_template = `
-                                <li class="list-unstyled m-0 ui-sortable-handle ui-draggable ui-draggable-handle" droppable="true" draggable="true" data-id="${data.id}">
+                                <li class="list-unstyled card-content-${data.id} m-0 ui-sortable-handle ui-draggable ui-draggable-handle" droppable="true" draggable="true" data-id="${data.id}">
                                 <a href="/drag-and-drop/${data.id}/">
                                 <a href="" data-toggle="modal" data-remote="/description/${data.id}" data-target="#modal-card">
                                 <h4 class="addcard w-100" data-id="${data.id}" id="card">
@@ -107,6 +114,7 @@ function createCard(){
             $(listContent).find('.create-card').before(card_template);
             $('.create-card').trigger('reset');
             cardDraggable();
+            archiveCard();
         }).fail(function(err){
             console.log('error');
         });
@@ -131,25 +139,33 @@ function updateCard(){
         var title = $(this).find('input').val();
         var description = $('#card-description').data('title');
         console.log('card_title:', title, 'card_description: ', description);
-        $.ajax({
-            url: $(this).attr('action'),
-            data: {card_title: title, card_description: description},
-            method: 'POST'
-        }).done(function(data){
-            e.preventDefault();
-            $('.card-title-description').show();
-            $('header').find('.card-title-description').html(data.card);
-            console.log(data.board, data.card);
-            $.ajax({
-                url: '/board/'+data.board,
-                method: 'get'
-            }).done(function(res){
-                $('body').find('.card-body').find('h4').html(data.card);
-                console.log('board'+data.board);
-            })
 
-            $('#updateCardForm').hide();
-        });
+        if(title.length < 1){
+            $('#card-error').show();
+        }else{
+            $.ajax({
+                url: $(this).attr('action'),
+                data: {card_title: title, card_description: description},
+                method: 'POST'
+            }).done(function(data){
+                e.preventDefault();
+                $('.card-title-description').show();
+                $('header').find('.card-title-description').html(data.card);
+                console.log(data.board, data.card);
+    
+                $.ajax({
+                    url: '/board/'+data.board,
+                    method: 'get'
+                }).done(function(res){
+                    var card_con = $(`.card-content-${ data.id }`);
+                    $('body').find('.card-body').find(card_con).find('h4').html(data.card);
+                    console.log('board'+data.board);
+                    $('#card-error').hide();
+                })
+    
+                $('#updateCardForm').hide();
+            });
+        }
     });
 }
 
@@ -157,7 +173,8 @@ function addCardDescription(){
     $('#card-description').on('submit', function(e){
         e.preventDefault();
         var description = $(this).find('textarea').val();
-        var title= $(this).data('title');
+        var title = $('header').find('#card-edit-form').data('title');
+        //var title= $(this).data('title');
         console.log('card description', description, 'card: ', title);
 
         $.ajax({
@@ -220,30 +237,46 @@ function editList(){
         var editList = $(this).attr('contenteditable', 'true');
 
         $(editList).attr('focus');
-        $(editList).css({"background-color": "white", "height": "21px", "padding-right":"2px"});
+        $(editList).css({"background-color": "white", "height": "21px", "padding-right":"7px"});
       
         $('.list-span').on('keypress', function(e){
             if(e.keyCode == '13'){
                 e.preventDefault();
+
                 var edit = $(this).text();
                 var list_id = $(this).data('id');
                 var list_con = $(`.list-content-${list_id}`);
-                $(list_con).data('title', edit);
-                
-                var this_url = $('.list-span').next().attr('href');
-                var update_list = $(list_con).data('title'); 
-                var update_list_id = $(list_con).data('id');
 
-                $.ajax({
-                    url: this_url,
-                    method: 'POST',
-                    data: {list_data: update_list, list_id: update_list_id}
-                }).done(function(data){
-                    $(editList).blur();
-                    $(editList).css({"background-color": "transparent"});
-                }).fail(function(err){
-                    console.log(err);
-                }); 
+                var template = `<span id='list-error'>Cannot accept empty list.</span>`;
+
+                if(edit < 1){
+                    var gogo = $(list_con).parents('.cc').find('#cc-span').html(template).css({"color": "red", "font-size": "12px", "font-weight":"normal"});
+                    console.log('ERRROR', `.list-content-${list_id}`);
+
+                    var con = $('.list-span');
+
+                }else{
+                    $(list_con).data('title', edit);
+                    
+                    var this_url = $('.list-span').next().attr('href');
+                    var update_list = $(list_con).data('title'); 
+                    var update_list_id = $(list_con).data('id');
+
+                    $.ajax({
+                        url: this_url,
+                        method: 'POST',
+                        data: {list_data: update_list, list_id: update_list_id}
+                    }).done(function(data){
+                        console.log('AAAAAAAaa');
+                        $(editList).blur();
+                        $(editList).css({"background-color": "transparent"});
+                        $(list_con).parents('.cc').find('#cc-span').html(template).css({"color": "transparent", "font-size": "12px", "font-weight":"normal"});
+                    }).fail(function(err){
+                        console.log(err);
+                    }); 
+                }
+                var value = $(list_con).data('title');
+                $(this).text(value);
             }
         });
     })
@@ -288,17 +321,24 @@ function editBoard(){
 function updateBoard(){
     $('#board-edit-form').on('submit', function(e){
         e.preventDefault();
-
-        $.ajax({
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            method: 'POST'
-        }).done(function(data){
-            e.preventDefault();
-            $('.board-title').show();
-            $('header').find('.board-title').html(data.board)
-            $('#edit-board').hide();
-        });
+        var value = $('#board-edit-form input[type="text"]').val();
+        
+        if(value.length < 1){
+            $('#board-error').show();
+        }else{
+            $.ajax({
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                method: 'POST'
+            }).done(function(data){
+                e.preventDefault();
+                $('.board-title').show();
+                $('header').find('.board-title').html(data.board)
+                $('#edit-board').hide();
+                $('#board-error').hide();
+                $('#board-edit-form').parents('h2').attr('value', data.board)
+            });
+        }
     });
 }
 
@@ -312,6 +352,9 @@ function mouseoutBoard(){
         if(!con.is(e.target) && con.has(e.target).length === 0){
             $('.board-title').show();
             $('#edit-board').hide();
+            $('#board-error').hide();
+            var parentValue = $('#board-edit-form').parents('h2').attr('value');
+            $('#board-edit-form input[type="text"]').val(parentValue);
         }
 
         if(!con2.is(e.target) && con2.has(e.target).length === 0){
@@ -374,14 +417,16 @@ function archiveBoard(){
 }
 
 function archiveList(){
-    $(document).on('click', '.archive-list', function(e){
+    $(document).on('click', '#archive-list', function(e){
+        e.preventDefault();
         var archive = $(this).data('id');
-
+        console.log('asd');
         $.ajax({
-            url: '/list-archive/'+archive,
+            url: $(this).attr('href'),
             method: 'get',
         }).done(function(res){
-            $(this).parents('.card').remove();
+            $('#archive-list').parents('.cc').remove();
+            console.log('Archive List');
         }).fail(function(err){
             console.log(err);
         });
@@ -389,19 +434,19 @@ function archiveList(){
 }
 
 function archiveCard(){
-    $('#archive-card').on('click', function(e){
+    $(document).on('click', '#arch-card',function(e){
         e.preventDefault();
         var archive = $(this).data('id');
-
+        console.log('card', archive);
         $.ajax({
-            url: '/card-archive/'+archive,
-            method: 'get'
+            url: $(this).attr('href'),
+            method: 'Get'
         }).done(function(res){
-            e.preventDefault();
-            $('li').find('h4').remove();
-            $('#modal-card').close();
+            var card_con = $(`.card-content-${archive}`);
+            $(card_con).find('h4').remove();
+            console.log('Archive Card');
         }).fail(function(err){
             console.log(err)
         });
-    });
+     });
 }
