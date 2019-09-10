@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 
 
 from .forms import (
@@ -20,11 +21,9 @@ from .forms import (
     LoginForm, 
     AddBoardTitleForm, 
     AddListForm, 
-    AddCardForm,
-    AddCardDescriptionForm,
-    InviteMemberForm,
+    CardImageForm,
 )
-from .models import Card, List, Board, BoardMembers, BoardInvite
+from .models import Card, List, Board, BoardMembers, BoardInvite, CardImage
 
 import json
 
@@ -60,20 +59,20 @@ class SignUpView(TemplateView):
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
         if form.is_valid():
-            #import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             new_user = form.save(commit=False)
-            email = BoardInvite.objects.filter(initial_user=new_user.email)
+            member_email = self.request.POST.get('email')
+            email = BoardInvite.objects.filter(email_member=new_user.email)
             #initial_board = InitialUser.objects.get(initial_user=email)
             if email.exists():
                 form.save()
-                add_member = InitialUser.objects.get(initial_user=new_user.email)#
-                board = Board.objects.get(id=add_member.board_member.board.id)
-                print(board)
-                user = User.objects.get(email=new_user.email)
+                add_member = BoardInvite.objects.get(email_member=member_email) #email
+                board = Board.objects.get(id=add_member.board_member.board.id)  #board na naa sa  BoardInvite na naa pud sa Board
+                user = User.objects.get(email=member_email)                     #ang user na giregister
                 member = BoardMembers.objects.get(board=board)
-                members=user, 
-                deactivate=False, 
-                owner=False
+                member.members=user,                    #member.members must be a User instance
+                member.deactivate=False, 
+                member.owner=False
                 member.save()
                 print('Success')
                 return redirect('login')
@@ -147,9 +146,10 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         board = Board.objects.filter(author=self.request.user, archived=False).order_by('id')
-        board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
+        # board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
+
         board_owner = BoardMembers.objects.filter(owner=True)
-        return render(self.request, self.template_name, {'board':board, 'board_member':board_member, 'board_owner':board_owner})
+        return render(self.request, self.template_name, {'board':board, 'board_owner':board_owner})
  
 
 class CreateBoardView(TemplateView):
@@ -199,9 +199,7 @@ class BoardView(TemplateView):
 
     template_name = 'trello/board.html'
     form = AddListForm
-    card_form = AddCardForm
     board_form = AddBoardTitleForm
-    invite_form = InviteMemberForm
 
     def get(self, *args, **kwargs):
         """
@@ -218,10 +216,8 @@ class BoardView(TemplateView):
         board = get_object_or_404(Board, id=kwargs.get("id")) 
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
         form = self.form()
-        card_form = self.card_form()
-        invite_form = self.invite_form()
         board_form = self.board_form(self.request.POST, instance=board)
-        context = {'board':board, 'board_members':board_members, 'form':form, 'card_form':card_form, 'board_form':board_form, 'invite_form':invite_form,}
+        context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form}
         return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
@@ -273,7 +269,7 @@ class CardDescriptionView(TemplateView):
         current_card.card_title = update_card
         print(current_card.card_title)
         current_card.save()
-        return JsonResponse({'card':current_card.card_title, 'card_description': current_card.card_description, 'board': current_card.board_list.board.id})
+        return JsonResponse({'card':current_card.card_title, 'id':current_card.id, 'card_description': current_card.card_description, 'board': current_card.board_list.board.id})
 
 
 
@@ -438,7 +434,7 @@ class CardArchiveView(View):
         card = get_object_or_404(Card, id=kwargs.get('id'))
         card.archived = True 
         card.save()
-        return redirect('board', card.board_list.board.id)
+        return JsonResponse({'board':card.board_list.board.id})
 
 
 class ArchiveView(TemplateView):
@@ -472,23 +468,14 @@ class InviteMemberView(TemplateView):
     """
 
     template_name = 'trello/board.html'
-    # form = InviteMemberForm
 
-    # def post(self, *args, **kwargs):
-    #     #import pdb; pdb.set_trace()
-    #     form = self.form(self.request.POST)
-    #     board = get_object_or_404(Board, id=kwargs.get('id'))
-    #     new_member = self.request.POST.get('members')
-    #     if form.is_valid():                                            
-    #         member = form.save(commit=False)
-    #         member.board = get_object_or_404(Board, id=kwargs.get('id'))
-    #         member.deactivate = False
-    #         if self.request.user:
-    #             member.owner = True
-    #             member.save()
-    #         member.save()
-    #         return redirect('board', board.id)
-    #     return render(self.request, self.template_name, {'form':form})  
+    def send_email_msg(self, message, to_email):
+        send_mail(
+            'Invite Member',
+            message,
+            settings.EMAIL_HOST_USER,
+            [to_email],
+        )
 
     def post(self, *args, **kwargs):
         member_email = self.request.POST.get('member_email')
@@ -497,28 +484,23 @@ class InviteMemberView(TemplateView):
         member = User.objects.filter(email=member_email)
 
         if member.exists():
-            send_mail(
-                'Invite Member',
-                'You are invited by '+invite_by+' to join board '+board.title+'.'+'\n'+'Click the link below to join.'
-                    +'\n'+'127.0.0.1:8000/dashboard',
-                'trellodmn@gmail.com',
-                [member_email],
-            )
+            message = 'You are invited by {} to join board {}. Click the link below to join. 127.0.0.1:8000/dashboard'.format(invite_by, board.title)
+            self.send_email_msg(message, member_email)
+
             current_member = User.objects.get(email=member_email)
-            board_member = BoardMembers.objects.create(board=board, members=current_member, deactivate=False, owner=False) #create a default board member everytime a new board is created
+            board_member = BoardMembers.objects.get(board=board)
+            board_member.members=current_member
+            board_member.deactivate=False
+            board_member.owner=False
             board_member.save()
 
             return HttpResponse('Email Send')
         else:
-            send_mail(
-                'Invite Member',
-                'You are invited by '+invite_by+' to join board '+board.title+'.'+'\n'+'Click the link below to join.'
-                    +'\n'+'127.0.0.1:8000/',
-                'trellodmn@gmail.com',
-                [member_email],
-            )
-            board = BoardMembers.objects.get(board=board)
-            initial_member = BoardInvite.objects.create(board_member=board, email_member=member_email) 
+            message = 'You are invited by {} to join board {}. Click the link below to join. 127.0.0.1:8000'.format(invite_by, board.title)
+            self.send_email_msg(message, member_email)
+            
+            member = BoardMembers.objects.get(board=board)
+            initial_member = BoardInvite.objects.create(board_member=member, email_member=member_email)
             initial_member.save()
 
             return HttpResponse('Email Send')
@@ -536,3 +518,21 @@ class LeaveBoardView(View):
         board_member.deactivate = True
         board_member.save()
         return JsonResponse({'board_member':board_member.id})
+
+
+class UploadImageView(TemplateView):
+    template_name = 'trello/description.html'
+    form = CardImageForm
+
+    def get(self, *args, **kwargs):
+        image = CardImage.objects.all()
+        form = self.form()
+        return render(self.request, self.template_name, {'form':form, 'image':image})
+
+    def post(self, *args, **kwargs):
+        image_title = self.request.POST.get('image_title')
+        card_img = self.request.POST.get('card_img')
+        uploaded_image = CardImage.objects.create(image_title=image_title, card_img=card_img)
+        uploaded_image.save()
+        print(uploaded_image.image_title)
+        return redirect('dashboard')

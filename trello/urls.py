@@ -25,7 +25,10 @@ from trello.views import (
         RestoreArchivedBoard,
         RestoreArchivedList,
         RestoreArchivedCard,
+        UploadImageView
 )
+from django.conf import settings
+from django.conf.urls.static import static
 from .models import Board
 from django.urls import path
 
@@ -62,4 +65,9 @@ urlpatterns = [
     path('board<int:id>/restore-board/', RestoreArchivedBoard.as_view(), name='restore-board'),
     path('list<int:id>/restore-list/', RestoreArchivedList.as_view(), name='restore-list'),
     path('card<int:id>/restore-card/', RestoreArchivedCard.as_view(), name='restore-card'),
+
+    path('upload-card-img/', UploadImageView.as_view(), name='upload-image'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

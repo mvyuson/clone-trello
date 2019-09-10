@@ -1,5 +1,5 @@
 from django import forms
-from .models import Board, List, Card, BoardMembers
+from .models import Board, List, Card, BoardMembers, CardImage
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -89,55 +89,8 @@ class AddListForm(forms.ModelForm):
         fields = ('list_title',)
 
 
-class AddCardForm(forms.ModelForm):
-    """
-    Create Card form.
-    """
-
-    card_title = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+ Add Card'})
-    )
-
+class CardImageForm(forms.ModelForm):
     class Meta:
-        model = Card
-        fields = ('card_title',)
-
-
-class AddCardDescriptionForm(forms.ModelForm):
-    """
-    Create Card Description form.
-    """
-
-    card_description = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Add more detailed description...'})
-    )
-
-    class Meta:
-        model = Card 
-        fields = {'card_description',}
-
-
-class InviteMemberForm(forms.ModelForm):
-    """
-    Invite Member form.
-    """
-
-    members = forms.ModelChoiceField(
-        queryset=User.objects.all(), 
-        required=False, 
-        to_field_name='username',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Username'})
-    )
-
-    class Meta:
-        model = BoardMembers
-        fields = {'members',}
-
-    def clean_member(self):
-        import pdb; pdb.set_trace()
-        members = self.cleaned_data['members']
-        board_member = BoardMembers.objects.filter(members=members)
-        print(board_member.members)
-        if board_member.exists():      
-           raise forms.ValidationError('User was already a member.') 
-        return members
+        model = CardImage
+        fields = {'image_title', 'card_img'}
+        

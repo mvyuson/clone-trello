@@ -28,6 +28,14 @@ class Card(models.Model):
         return self.card_title
 
 
+class CardImage(models.Model):
+    image_title = models.CharField(max_length=200)
+    card_img = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.image_title
+
+
 class List(models.Model):
     """
     'board' is the board the list is member of
