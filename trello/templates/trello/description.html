@@ -2,6 +2,13 @@
 
 {% block content %}
 <header>
+    <div class="container-fluid" id="card_image">
+        {% for i in card_image %}
+            <img src="{{ i.image.url }}" id="card-cover" class="img-responsive">
+            <a data-id="{{ i.image.id }}" href="{% url 'delete-card-cover' i.image.id %}"></a>
+        {% endfor %}
+       
+    </div>
     <h2 class="mb-2" id="card_container">
         <a class="card-title-description text-dark" href="">{{ card.card_title }}</a>
         <form class="mb-0" id="card-edit-form" method="POST" data-title="{{ card.card_title }}" action="{% url 'description' card.id %}">
@@ -16,10 +23,10 @@
         <div class="col-sm-8">
             <div class="description">
                 <h4>Description</h4>
-                <div class="card">
+                <div class="card w-100" id="card-description">
                     <div class="card2">
                         {% if not card.card_description %}
-                            <p id="desc">Add more detailed description...</p>
+                            <p class="pl-2 pt-2" id="desc">Add more detailed description...</p>
                         {% else %}
                             {{ card.card_description }}
                         {% endif %}
@@ -27,8 +34,8 @@
                 </div>
                 <form id="card-description" method="POST" data-title="{{ card.card_description }}" action="{% url 'description' card.id %}">
                     {% csrf_token %}
-                    <textarea id="add-card-description" name="card_description" value="{{ card.card_description }}" placeholder="{{ card.card_description }}" style="display:none;">{{ card.card_description }}</textarea> <br>
-                    <button id="save-button" type="submit" class="btn btn-success mb-3" style="display: none;">Save</button><br>
+                    <textarea class="w-100" id="add-card-description" name="card_description" value="{{ card.card_description }}" placeholder="{{ card.card_description }}" style="display:none;">{{ card.card_description }}</textarea> <br>
+                    <button id="save-button" type="submit" class="btn btn-success mt-2 mb-3" style="display: none;">Save</button><br>
                 </form>
             </div>
             <div class="activity">
@@ -42,45 +49,21 @@
                 </div>
             </div>
             <div class="checklist">
-                <h4>Comment</h4>
-            </div>
-            <div class="upload_cover_imgs">
-                <!-- <form method="POST" enctype="multipart/form-data" action="{% url 'upload-image' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                      <label for="exampleFormControlFile1">Upload Card Cover</label>
-                      <input type="text" name="image_title" class="form-control mb-2" placeholder="Enter Image Title">
-                      <input type="file" name="card_img" class="form-control-file" id="exampleFormControlFile1">
-                    </div>
-                    <button class="btn btn-warning" type="submit">Upload</button>
-                  </form> -->
+                <h4>Add Cover</h4>
             </div>
             <div class="container-fluid">
-                    <form id="a" method="POST" novalidate style="border: 1px solid black;">
-                            <span class="error" style="display:none;">This field is required.</span>
-                            {% csrf_token %}
-                            {{ form }}
-                            <button class="btn btn-warning w-100" type="submit">Save</button>
-                    </form>
+                <form id="cover-image-form" method="POST" enctype="multipart/form-data" action="{% url 'upload-image' card.id %}" novalidate>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-warning w-100" type="submit">Upload</button>
+                </form>
             </div>
         </div>
         <div class="col-sm-4">
-            <a id="arch-card" data-id="{{ card.id }}" class="text-dark" href="{% url 'card-archive' card.id %}">Archive Card</a>
+            <a id="arch-card" data-id="{{ card.id }}" class="text-dark mb-5" href="{% url 'card-archive' card.id %}">Archive Card</a><br><br>
             <!-- <button class="btn ml-5 archive-card" id="archive-card" data-id="{{ card.id }}"></button> -->
-            <button class="btn ml-5"><a class="text-dark" href="">Cover</a></button>
+            <a id="delete-cover-img" class="text-dark" href="">Delete Cover</a>
             
-            
-            
-            <!-- <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Dropdown button
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </div> -->
     </div>
 </body>
 {% endblock %}

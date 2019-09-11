@@ -55,6 +55,7 @@
         </div>
     </header>
     <body>
+            
         <div class="container float-left ml-5 mt-2" id="list-container">
             <form id="list-form" action="{% url 'board' board.id %}" method="POST">
                 {% csrf_token %}
@@ -90,6 +91,11 @@
                                             <a href="{% url 'drag-and-drop' card.id %}">
                                                 <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
                                                     <h4 class="addcard w-100" id="card">
+                                                            <div class="container-fluid mb-3" id="card_cover_image">
+                                                                    {% for cardimage in card.cardimage_set.all %}
+                                                                        <img src="{{ cardimage.image.url }}" class="mt-4 img-responsive" id="board_card_cover">
+                                                                    {% endfor %}
+                                                            </div>
                                                         {{ card }}
                                                         <button class="btn float-right" id="description">
                                                             <span class="glyphicon glyphicon-pencil"></span>
@@ -110,6 +116,9 @@
                     
                 {% endif %}
             {% endfor %}
+        </div>
+        <div class="container">
+            KOKOKOK
         </div>
     </body>
 {% endblock %}

@@ -66,7 +66,7 @@ urlpatterns = [
     path('list<int:id>/restore-list/', RestoreArchivedList.as_view(), name='restore-list'),
     path('card<int:id>/restore-card/', RestoreArchivedCard.as_view(), name='restore-card'),
 
-    path('upload-card-img/', UploadImageView.as_view(), name='upload-image'),
+    path('upload-image/<int:id>/', UploadImageView.as_view(), name='upload-image'),
 ]
 
 if settings.DEBUG:

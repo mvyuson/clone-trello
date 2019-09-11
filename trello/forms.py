@@ -1,7 +1,7 @@
-from django import forms
 from .models import Board, List, Card, BoardMembers, CardImage
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django import forms
 
 
 class SignUpForm(forms.ModelForm):
@@ -92,5 +92,5 @@ class AddListForm(forms.ModelForm):
 class CardImageForm(forms.ModelForm):
     class Meta:
         model = CardImage
-        fields = {'image_title', 'card_img'}
+        fields = {'image'}
         

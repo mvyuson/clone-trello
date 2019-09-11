@@ -59,26 +59,27 @@ class SignUpView(TemplateView):
     def post(self, *args, **kwargs):
         form = self.form(self.request.POST)
         if form.is_valid():
-            import pdb; pdb.set_trace()
-            new_user = form.save(commit=False)
-            member_email = self.request.POST.get('email')
-            email = BoardInvite.objects.filter(email_member=new_user.email)
-            #initial_board = InitialUser.objects.get(initial_user=email)
-            if email.exists():
-                form.save()
-                add_member = BoardInvite.objects.get(email_member=member_email) #email
-                board = Board.objects.get(id=add_member.board_member.board.id)  #board na naa sa  BoardInvite na naa pud sa Board
-                user = User.objects.get(email=member_email)                     #ang user na giregister
-                member = BoardMembers.objects.get(board=board)
-                member.members=user,                    #member.members must be a User instance
-                member.deactivate=False, 
-                member.owner=False
-                member.save()
-                print('Success')
-                return redirect('login')
-            else:
-                new_user.save()
-                return redirect('login')
+            form.save()
+            #import pdb; pdb.set_trace()
+            # new_user = form.save(commit=False)
+            # member_email = self.request.POST.get('email')
+            # email = BoardInvite.objects.filter(email_member=new_user.email)
+            # #initial_board = InitialUser.objects.get(initial_user=email)
+            # if email.exists():
+            #     new_user.save()
+            #     add_member = BoardInvite.objects.get(email_member=member_email) #email
+            #     board = Board.objects.get(id=add_member.board_member.board.id)  #board na naa sa  BoardInvite na naa pud sa Board
+            #     user = User.objects.get(email=member_email)                     #ang user na giregister
+            #     member = BoardMembers.objects.get(board=board)
+            #     member.members=user,                    #member.members must be a User instance
+            #     member.deactivate=False, 
+            #     member.owner=False
+            #     member.save()
+            #     print('Success')
+            #     return redirect('login')
+            # else:
+            #     new_user.save()
+            return redirect('login')
         context = {'form':form}
         return render(self.request, self.template_name, context)
 
@@ -146,10 +147,10 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         board = Board.objects.filter(author=self.request.user, archived=False).order_by('id')
-        # board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
-
+        board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
+        card_image = CardImage.objects.all()
         board_owner = BoardMembers.objects.filter(owner=True)
-        return render(self.request, self.template_name, {'board':board, 'board_owner':board_owner})
+        return render(self.request, self.template_name, {'board':board, 'board_member':board_member, 'board_owner':board_owner, 'card_image':card_image})
  
 
 class CreateBoardView(TemplateView):
@@ -217,7 +218,8 @@ class BoardView(TemplateView):
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
         form = self.form()
         board_form = self.board_form(self.request.POST, instance=board)
-        context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form}
+        card_image = CardImage.objects.all()
+        context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form, 'card_image':card_image}
         return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
@@ -253,10 +255,16 @@ class CardDescriptionView(TemplateView):
     """
 
     template_name = 'trello/description.html'
+    form = CardImageForm
 
     def get(self, *args, **kwargs):
+        form = self.form()
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        context = {'card':card, 'board_list':card.board_list.id}
+        #import pdb; pdb.set_trace()
+        card_image = CardImage.objects.filter(card=card)
+        print(card_image)
+        #card_image = CardImage.objects.all()
+        context = {'card':card, 'board_list':card.board_list.id, 'card_image':card_image, 'form':form}
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
@@ -520,19 +528,22 @@ class LeaveBoardView(View):
         return JsonResponse({'board_member':board_member.id})
 
 
-class UploadImageView(TemplateView):
+class UploadImageView(View):
     template_name = 'trello/description.html'
     form = CardImageForm
 
-    def get(self, *args, **kwargs):
-        image = CardImage.objects.all()
-        form = self.form()
-        return render(self.request, self.template_name, {'form':form, 'image':image})
-
     def post(self, *args, **kwargs):
-        image_title = self.request.POST.get('image_title')
-        card_img = self.request.POST.get('card_img')
-        uploaded_image = CardImage.objects.create(image_title=image_title, card_img=card_img)
-        uploaded_image.save()
-        print(uploaded_image.image_title)
-        return redirect('dashboard')
+        form = self.form(self.request.POST, self.request.FILES)
+        parent_card = get_object_or_404(Card, id=kwargs.get('id'))
+        if form.is_valid():
+            card_image = form.save(commit=False)
+            card_image.card = parent_card
+            str_card_image = str(card_image.image)
+            print(str_card_image)
+            print(card_image.image.url)
+            card_image.save()
+            return redirect('board', parent_card.board_list.board.id)
+            
+        #     return JsonResponse({'image':image.card_img})
+        # new_form = CardImageForm()
+        # return render(self.request, self.template_name, {'form':new_form})

@@ -29,11 +29,11 @@ class Card(models.Model):
 
 
 class CardImage(models.Model):
-    image_title = models.CharField(max_length=200)
-    card_img = models.ImageField(upload_to='images/')
+    card = models.ForeignKey('Card', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/')
 
     def __str__(self):
-        return self.image_title
+        return f'{self.card.id}'
 
 
 class List(models.Model):
