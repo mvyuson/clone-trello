@@ -22,8 +22,19 @@ from .forms import (
     AddBoardTitleForm, 
     AddListForm, 
     CardImageForm,
+    UserProfileForm,
+    EditUserForm
 )
-from .models import Card, List, Board, BoardMembers, BoardInvite, CardImage
+
+from .models import (
+    Card, 
+    List, 
+    Board, 
+    BoardMembers, 
+    BoardInvite, 
+    CardImage, 
+    UserProfile
+)
 
 import json
 
@@ -60,25 +71,6 @@ class SignUpView(TemplateView):
         form = self.form(self.request.POST)
         if form.is_valid():
             form.save()
-            #import pdb; pdb.set_trace()
-            # new_user = form.save(commit=False)
-            # member_email = self.request.POST.get('email')
-            # email = BoardInvite.objects.filter(email_member=new_user.email)
-            # #initial_board = InitialUser.objects.get(initial_user=email)
-            # if email.exists():
-            #     new_user.save()
-            #     add_member = BoardInvite.objects.get(email_member=member_email) #email
-            #     board = Board.objects.get(id=add_member.board_member.board.id)  #board na naa sa  BoardInvite na naa pud sa Board
-            #     user = User.objects.get(email=member_email)                     #ang user na giregister
-            #     member = BoardMembers.objects.get(board=board)
-            #     member.members=user,                    #member.members must be a User instance
-            #     member.deactivate=False, 
-            #     member.owner=False
-            #     member.save()
-            #     print('Success')
-            #     return redirect('login')
-            # else:
-            #     new_user.save()
             return redirect('login')
         context = {'form':form}
         return render(self.request, self.template_name, context)
@@ -218,7 +210,7 @@ class BoardView(TemplateView):
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
         form = self.form()
         board_form = self.board_form(self.request.POST, instance=board)
-        card_image = CardImage.objects.all()
+        card_image = CardImage.objects.all().first()
         context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form, 'card_image':card_image}
         return render(self.request, self.template_name, context)    
 
@@ -504,7 +496,7 @@ class InviteMemberView(TemplateView):
 
             return HttpResponse('Email Send')
         else:
-            message = 'You are invited by {} to join board {}. Click the link below to join. 127.0.0.1:8000'.format(invite_by, board.title)
+            message = 'You are invited by {} to join board {}. Click the link below to join. 127.0.0.1:8000/register'.format(invite_by, board.title)
             self.send_email_msg(message, member_email)
             
             member = BoardMembers.objects.get(board=board)
@@ -513,6 +505,43 @@ class InviteMemberView(TemplateView):
 
             return HttpResponse('Email Send')
 
+
+class RegisterInvitedUser(View):
+    form = SignUpForm
+    template_name = "trello/register_invited_user.html"
+
+    def get(self, *args, **kwargs):
+        form = self.form()
+        return render(self.request, self.template_name, {'form':form})
+
+    def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        form = self.form(self.request.POST)
+        if form.is_valid():
+            form.save(commit=False)
+            member_email = self.request.POST.get('email')
+            email = BoardInvite.objects.filter(email_member=member_email)
+
+            if email.exists():
+                form.save()
+                new_member = BoardInvite.objects.get(email_member=member_email)
+                board = Board.objects.get(id=new_member.board_member.board.id)
+                user = User.objects.get(email=member_email)
+
+                member = BoardMembers.objects.get(board=board)
+                member.members = user
+                member.deactivate = False
+                member.owner = False
+                member.save()
+
+                print('Success')
+                return redirect('login')
+            else:
+                print('Fail')
+                return HttpResponse(status=400)
+        form = SignUpForm()
+        return render(self.request, self.template_name, {'form':form})
+        
 
 class LeaveBoardView(View):
     """
@@ -528,22 +557,49 @@ class LeaveBoardView(View):
         return JsonResponse({'board_member':board_member.id})
 
 
+class EditUserProfile(TemplateView):
+    template_name = 'trello/user_profile.html'
+
+    def get(self, *args, **kwargs):
+        user = UserProfile.objects.get(user=self.request.user)
+        print(user)
+        context = {'userprofile':user}
+        return render(self.request, self.template_name, context)
+
+    def post(self, *args, **kwargs):
+        update_username = self.request.POST.get('profile_username')
+        update_email = self.request.POST.get('profile_email')
+        update_bio = self.request.POST.get('profile_bio')
+        user = User.objects.get(id=self.request.user.id)
+        user_profile = UserProfile.objects.get(user=user)
+        user_profile.user.username = update_username 
+        user_profile.user.email = update_email
+        user_profile.bio = update_bio
+        user_profile.save()
+        print('User Edited')
+        return JsonResponse({'username':user.username, 'email':user.email, 'bio':user_profile.bio})
+
+
 class UploadImageView(View):
     template_name = 'trello/description.html'
     form = CardImageForm
 
     def post(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         form = self.form(self.request.POST, self.request.FILES)
         parent_card = get_object_or_404(Card, id=kwargs.get('id'))
         if form.is_valid():
             card_image = form.save(commit=False)
-            card_image.card = parent_card
-            str_card_image = str(card_image.image)
-            print(str_card_image)
-            print(card_image.image.url)
-            card_image.save()
-            return redirect('board', parent_card.board_list.board.id)
-            
-        #     return JsonResponse({'image':image.card_img})
-        # new_form = CardImageForm()
-        # return render(self.request, self.template_name, {'form':new_form})
+            this_card = CardImage.objects.filter(card=parent_card)
+            if this_card.exists():
+                return redirect('board', parent_card.board_list.board.id)
+            else:
+                card_image.card = parent_card
+                card_image.empty=True
+                str_card_image = str(card_image.image)
+                print(str_card_image)
+                print(card_image.image.url)
+                card_image.save()
+                return redirect('board', parent_card.board_list.board.id)
+        else:
+            return HttpResponse(status=400)

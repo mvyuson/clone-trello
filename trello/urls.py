@@ -25,7 +25,9 @@ from trello.views import (
         RestoreArchivedBoard,
         RestoreArchivedList,
         RestoreArchivedCard,
-        UploadImageView
+        UploadImageView,
+        RegisterInvitedUser,
+        EditUserProfile,
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -35,6 +37,7 @@ from django.urls import path
 urlpatterns = [  
     path('', SignUpView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
+    path('register/', RegisterInvitedUser.as_view(), name='register'),
     path('password_reset/', auth_views.password_reset, name='password_reset'),
     path('password_reset_done/', auth_views.password_reset_done, name='password_reset_done'),
     path('reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', auth_views.password_reset_confirm, name='password_reset_confirm'),
@@ -67,6 +70,7 @@ urlpatterns = [
     path('card<int:id>/restore-card/', RestoreArchivedCard.as_view(), name='restore-card'),
 
     path('upload-image/<int:id>/', UploadImageView.as_view(), name='upload-image'),
+    path('user-profile/', EditUserProfile.as_view(), name='user-profile'),
 ]
 
 if settings.DEBUG:

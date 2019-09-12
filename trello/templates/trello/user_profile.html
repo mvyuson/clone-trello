@@ -1,0 +1,58 @@
+{% extends 'trello/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid mt-3 pt-5">
+    <div class="container w-50 rounded bg-white p-5 mt-5">
+        <h2 class="text-center">Manage your personal information</h2>
+        <div class="row border-bottom">
+            <div class="col-9">
+                <h3 class="mt-5 pb-2">About</h3>
+            </div>
+            <div class="col-3 pl-5 pt-5">
+                <button class="btn ml-4" id="edit-user">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </button>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-7">
+                <form id="user_form" method="POST" action="{% url 'user-profile' %}" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-10">
+                            <h5 class="font-weight-bold mt-2" id="label-username">Username</h5>
+                        </div>
+                        <div class="col-2">
+                            <a id="close-user-form" class="float-right text-secondary" href="" style="display: none;"><b>x</b></a>
+                        </div>
+                    </div>
+                    <h5 class="font-weight-light border mt-0 p-3" id="profile-username">{{ user.username }}</h5>
+
+                    <div class="form-group">
+                        <input id="id_username" type="text" value="{{ userprofile.user.username }}" name="profile_username" style="display:none;">
+                    </div>
+
+                    <h5 class="font-weight-bold mt-5" id="label-email">Email address</h5>
+                    <h5 class="font-weight-light border p-3" id="profile-email">{{ user.email }}</h5>
+
+                    <div class="form-group">
+                        <input id="id_email" type="text" value="{{ userprofile.user.email }}" name="profile_email" style="display:none;">
+                    </div>
+
+                    <h5 class="font-weight-bold mt-5" id="label-email">Bio</h5>
+
+                    <div class="form-group">
+                        <textarea id="id_bio" value="{{ user__userprofile.bio }}" placeholder="{{ userprofile.bio }}" name="profile_bio"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 mb-5">Save</button>
+                </form>                
+            </div>
+            <div class="col-5">
+                <h5 class="font-weight-bold text-center mt-2">Avatar</h5>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

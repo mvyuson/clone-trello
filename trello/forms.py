@@ -1,4 +1,4 @@
-from .models import Board, List, Card, BoardMembers, CardImage
+from .models import Board, List, Card, BoardMembers, CardImage, UserProfile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
@@ -93,4 +93,19 @@ class CardImageForm(forms.ModelForm):
     class Meta:
         model = CardImage
         fields = {'image'}
-        
+
+
+class UserProfileForm(forms.ModelForm):
+    bio = forms.CharField(widget=forms.Textarea, label='')
+    class Meta: 
+        model = UserProfile
+        fields = ('bio',)
+
+
+class EditUserForm(forms.ModelForm):
+    username = forms.CharField(widget=forms.TextInput, label='')
+    email = forms.CharField(widget=forms.EmailInput, label='')
+
+    class Meta:
+        model = User 
+        fields = ('username', 'email')

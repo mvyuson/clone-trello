@@ -1,7 +1,9 @@
+from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.db import models
+from django.db.models.signals import post_save
+from django.db.models.signals import post_delete
 
 from datetime import datetime
 
@@ -31,6 +33,7 @@ class Card(models.Model):
 class CardImage(models.Model):
     card = models.ForeignKey('Card', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/')
+    empty = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.card.id}'
@@ -87,6 +90,7 @@ class BoardMembers(models.Model):
     deactivate = models.BooleanField(default=True)
     owner = models.BooleanField(default=False)
 
+
 class BoardInvite(models.Model):
     """
     Stores the inivited user with no existing account here.
@@ -96,14 +100,13 @@ class BoardInvite(models.Model):
     email_member = models.CharField(max_length=200)
 
 
-"""
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(default='')
 
-BoardInvite
 
-    accepted = False
-    board - Board A
-    email = 
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        user_profile = UserProfile.objects.create(user=instance)
 
-    get_user():
-        return User.objects.filter(email=email)
-"""
+post_save.connect(create_user_profile, sender=User)
