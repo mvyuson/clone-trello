@@ -13,6 +13,10 @@ $(document).ready(function (){
     cardDraggable();
     leaveBoard();
     mouseoutBoard();
+    editUser();
+    updateUser();
+    closeUserForm();
+
 
     $('#modal-card').on('shown.bs.modal', function (e) {
         var remoteUrl = $(e.relatedTarget).data('remote');
@@ -103,7 +107,7 @@ function createCard(){
                                 <h4 class="addcard w-100 pt-3" data-id="${data.id}" id="card">
                                     ${data.card}
                                 <button class="btn float-right" id="description">
-                                    <span class="glyphicon glyphicon-pencil"></span>
+                                    <span class="glyphicon glyphicon-pencil" id="pencil"></span>
                                 </button>
                                 </h4>
                                 </a>
@@ -476,3 +480,50 @@ function deleteCardCover(){
         console.log('Delete Cover', delete_image);
     })
 }
+
+function editUser(){
+    $(document).on('click', '#edit-user', function(e){
+        console.log('Edit User')
+        $('#id_username').show();
+        $('#id_email').show();
+        $('#close-user-form').show();
+        $('#profile-username').hide();
+        $('#profile-email').hide();
+        updateUser();
+    })
+}
+
+function closeUserForm(){
+    $(document).on('click', '#close-user-form', function(e){
+        $('#id_username').hide();
+        $('#id_email').hide();
+        $('#close-user-form').hide()
+        $('#profile-username').show();
+        $('#profile-email').show();
+    })
+}
+
+function updateUser(){
+    $('#user-form').on('submit', function(e){
+        console.log('User FORM');
+        e.preventDefault();
+        $.ajax({
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            method: 'POST'
+        }).done(function(data){
+            console.log('FORM, FORM')
+            $('#profile-username').text(data.username);
+            $('#profile-email').text(data.email)
+            $('#id_bio').val(data.bio)
+
+            $('#id_username').hide();
+            $('#id_email').hide();
+            $('#close-user-form').hide()
+            $('#profile-username').show();
+            $('#profile-email').show();
+        })
+    })
+}
+
+

@@ -1,11 +1,16 @@
-<div class="page-header bg-warning mt-0 mb-0">
+<nav class="navbar navbar-expand-lg navbar-light bg-warning pt-0">
+    <a class="navbar-brand text-white" href="{% url 'user-profile' %}">{{ user.username }}</a>
+    <a class="nav-item text-white" href="{% url 'dashboard' %}">Boards</a>
+    <button class="btn mr-0 pr-0" id="archive"><span class="text-white">Archive</span></button>
+    <span class="navbar-brand text-white m-auto pl-0 pr-5"><em><b>Trello</b></em></span>
+    <div class="nav-item float-right ml-5">
+        <button class="btn ml-5" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span class="text-white" id="add-board"><b>+</b></span></button>
+        <a class="navbar-item text-white" href="{% url 'logout' %}">Logout</a>
+    </div>
+</nav>
+<!-- <div class="page-header bg-warning mt-0 mb-0">
     <div class="dropdown" id="list-dropdown">
-        <button class="btn text-white mt-3" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{ user.username }}
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            {{ user.email }}
-        </div>
+        <a class="btn text-white mt-3" href="{% url 'user-profile' %}">{{ user.username }}</a>
     </div>
     <div class="header-board pr-0">
         <a class="mr-3 float-left" href="{% url 'dashboard' %}">Boards</a>
@@ -18,4 +23,4 @@
         <a class="p-0 mt-3 mr-3" href="{% url 'logout' %}">Logout</a>
         <button class="btn p-0" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span class="p-0" id='add-board'><b>+</b></span></button>
     </div>
-</div>
+</div> -->

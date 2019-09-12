@@ -5,23 +5,24 @@ body{
 }
 
 .board-header{
-    height: 70px;
+    margin-top: -20px;
+    height: 60px;
 }
 
 .board-row{
-    height: 70px;
+    height: 60px;
 }
 
 #add-board{
     color: #ffffff;
-    font-size: 25px;
-    padding: 0px;
-    height: 10px;
+    font-size: 33px;
+    
 }
 
 #create-board{
     padding-top: 0px;
     height: 10px;
+    margin-top: -45px;
 }
 
 .input-card{
@@ -164,7 +165,7 @@ body{
     width: 250px;
 }
 
-.glyphicon-pencil{
+#pencil{
     font-size: 10px;
     color: #484848;
 }
@@ -287,4 +288,27 @@ body{
     padding-right: 8px;
     padding-top: 9px;
     padding-bottom: 9px;
+}
+
+#id_image{
+    background-color: rgba(9, 30, 66, .05);
+    border: 1px solid rgba(9, 30, 66, .05);
+    width: 100%;
+}
+
+#id_bio{
+    width: 100%;
+    border-color: #dee2e6;
+}
+
+#id_email{
+    display: none;
+    width: 100%;
+    height: 37px;
+}
+
+#id_username{
+    display: none;
+    width: 100%;
+    height: 37px;
 }
