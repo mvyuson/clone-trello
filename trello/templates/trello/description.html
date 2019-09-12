@@ -1,11 +1,12 @@
 {% extends 'trello/static_files.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
 <header>
     <div class="container-fluid" id="card_image">
         {% for i in card_image %}
             <img src="{{ i.image.url }}" id="card-cover" class="img-responsive">
-            <a data-id="{{ i.image.id }}" href="{% url 'delete-card-cover' i.image.id %}"></a>
         {% endfor %}
        
     </div>
@@ -51,11 +52,13 @@
             <div class="checklist">
                 <h4>Add Cover</h4>
             </div>
-            <div class="container-fluid">
-                <form id="cover-image-form" method="POST" enctype="multipart/form-data" action="{% url 'upload-image' card.id %}" novalidate>
+            <div class="container-fluid pr-0" id="upload-form">
+                <form class="w-100" id="cover-image-form" method="POST" enctype="multipart/form-data" action="{% url 'upload-image' card.id %}">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button class="btn btn-warning w-100" type="submit">Upload</button>
+                    <div class="form-group">
+                        {{ form.as_p }}
+                    </div>
+                    <button class="btn btn-success" type="submit">Upload</button>
                 </form>
             </div>
         </div>
