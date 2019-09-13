@@ -1,7 +1,7 @@
 {% extends 'trello/base.html' %}
 
 {% block content %}
-    <div class="container-fluid mt-3">
+    <div class="container-fluid mt-3" id="board-list">
         <h2 class="mb-5">List of Boards</h2>
         <h5 class="mt-3">Personal Boards</h5>
         {% for b in board %}
@@ -11,7 +11,7 @@
         {% for boards in board_member %}
             {% if boards.deactivate == False %}
                 {% if boards.owner == False %}
-                    <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
+                    <ul class="list-unstyled text-dark ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
                 {% endif %}
             {% endif %}
         {% endfor %}

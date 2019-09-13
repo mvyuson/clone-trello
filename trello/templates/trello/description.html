@@ -65,7 +65,7 @@
         <div class="col-sm-4">
             <a id="arch-card" data-id="{{ card.id }}" class="text-dark mb-5" href="{% url 'card-archive' card.id %}">Archive Card</a><br><br>
             <!-- <button class="btn ml-5 archive-card" id="archive-card" data-id="{{ card.id }}"></button> -->
-            <a id="delete-cover-img" class="text-dark" href="">Delete Cover</a>
+            <a id="delete-cover-img" data-id="{{ card.id }}" class="text-dark" href="{% url 'delete-cover' card.id %}">Delete Cover</a>
             
     </div>
 </body>

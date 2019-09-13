@@ -96,12 +96,13 @@ class BoardInvite(models.Model):
     Stores the inivited user with no existing account here.
     """
 
-    board_member = models.ForeignKey('BoardMembers', on_delete=models.CASCADE)
+    board = models.ForeignKey('Board', on_delete=models.CASCADE)
     email_member = models.CharField(max_length=200)
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='images/', null=True, blank=True)
     bio = models.TextField(default='')
 
 
@@ -110,3 +111,10 @@ def create_user_profile(sender, instance, created, **kwargs):
         user_profile = UserProfile.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=User)
+
+
+def update_user_profile(sender, instance, update_fields, **kwargs):
+    if update_fields:
+        user = self.user.save(update_fields=['username', 'email'])
+
+post_save.connect(update_user_profile, sender=UserProfile)

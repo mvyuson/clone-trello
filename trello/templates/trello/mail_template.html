@@ -1,0 +1,5 @@
+{% autoescape off %}
+    You are invited by {{ invite_by }} to join board {{ board }}. Please click the link below to join.
+
+    {{ protocol }}://{{ domain }}{% url 'dashboard' uidb64=uid %}
+{% endautoescape %}

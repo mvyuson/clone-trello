@@ -28,6 +28,7 @@ from trello.views import (
         UploadImageView,
         RegisterInvitedUser,
         EditUserProfile,
+        DeleteCardCoverImage
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -71,6 +72,7 @@ urlpatterns = [
 
     path('upload-image/<int:id>/', UploadImageView.as_view(), name='upload-image'),
     path('user-profile/', EditUserProfile.as_view(), name='user-profile'),
+    path('delete-cover/<int:id>/', DeleteCardCoverImage.as_view(), name='delete-cover')
 ]
 
 if settings.DEBUG:

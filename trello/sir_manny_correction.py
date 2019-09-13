@@ -203,7 +203,6 @@ class BoardView(TemplateView):
             card_list = get_object_or_404(List, id=kwargs.get('id'))
             title = self.request.POST.get('card_title')
             card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
-            card.save()
             return JsonResponse({'card':card.card_title, 'id':card.id})
 
         board = get_object_or_404(Board, id=kwargs.get("id")) 
@@ -491,25 +490,19 @@ class InviteMemberView(TemplateView):
     def post(self, *args, **kwargs):
         member_email = self.request.POST.get('member_email')
         board = get_object_or_404(Board, id=kwargs.get('id'))
-        invite_by = self.request.user.username
-        member = User.objects.filter(email=member_email)
-
-        if member.exists():
-            message = 'You are invited by {} to join board {}. Click the link below to join. http://3b8b75b8.ngrok.io/dashboard'.format(invite_by, board.title)
+        try:
+            member = User.objects.get(email=member_email)
+            message = 'You are invited by {} to join board {}. Click the link below to join. http://192.168.2.216:8000//dashboard'.format(self.request.user.username, board.title)
             self.send_email_msg(message, member_email)
 
             current_member = User.objects.get(email=member_email)
             new_board_member = BoardMembers.objects.create(board=board, members=current_member, deactivate=False, owner=False)
             new_board_member.save()
-
             return redirect('board', board.id)
-        else:
-            message = 'You are invited by {} to join board {}. Click the link below to join. http://3b8b75b8.ngrok.io/register'.format(invite_by, board.title)
+        except User.DoesNotExist():
+            message = 'You are invited by {} to join board {}. Click the link below to join. http://192.168.2.216:8000//register'.format(invite_by, board.title)
             self.send_email_msg(message, member_email)
-            
             initial_member = BoardInvite.objects.create(board=board, email_member=member_email)
-            initial_member.save()
-
             return redirect('board', board.id)
 
 
@@ -525,26 +518,14 @@ class RegisterInvitedUser(View):
         #import pdb; pdb.set_trace()
         form = self.form(self.request.POST)
         if form.is_valid():
-            form.save(commit=False)
-            member_email = self.request.POST.get('email')
-            email = BoardInvite.objects.filter(email_member=member_email)
+            user = form.save()
+            #invite = BoardInvite.objects.get(code=kwargs.get('code'))
+            # invite = BoardInvite.objects.filter(email_member=member_email)
+            new_member = BoardInvite.objects.get(email_member=invite.email)
+            new_board_member = BoardMembers.objects.create(board=invite.board, members=user, deactivate=False)
+            return redirect('login')
+        return HttpResponse(status=400)
 
-            if email.exists():
-                form.save()
-                new_member = BoardInvite.objects.get(email_member=member_email)
-                board = Board.objects.get(id=new_member.board.id)
-                user = User.objects.get(email=member_email)
-
-                new_board_member = BoardMembers.objects.create(board=board, members=user, deactivate=False, owner=False)
-                new_board_member.save()
-
-                print('Success')
-                return redirect('login')
-            else:
-                print('Fail')
-                return HttpResponse(status=400)
-        form = SignUpForm()
-        return render(self.request, self.template_name, {'form':form})
         
 
 class LeaveBoardView(View):
@@ -621,5 +602,4 @@ class UploadImageView(View):
                 print(card_image.image.url)
                 card_image.save()
                 return redirect('board', parent_card.board_list.board.id)
-        else:
-            return HttpResponse(status=400)
+        return HttpResponse(status=400)

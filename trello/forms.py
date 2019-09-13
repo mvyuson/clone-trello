@@ -89,6 +89,28 @@ class AddListForm(forms.ModelForm):
         fields = ('list_title',)
 
 
+class InviteMemberForm(forms.ModelForm):
+    members = forms.ModelChoiceField(
+        queryset=User.objects.all(), 
+        required=False, 
+        to_field_name='username',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Username'})
+    )
+
+    class Meta:
+        model = BoardMembers
+        fields = {'members',}
+
+    def clean_member(self):
+        import pdb; pdb.set_trace()
+        members = self.cleaned_data['members']
+        board_member = BoardMembers.objects.filter(members=members)
+        print(board_member.members)
+        if board_member.exists():      
+           raise forms.ValidationError('User was already a member.') 
+        return members
+
+
 class CardImageForm(forms.ModelForm):
     class Meta:
         model = CardImage
@@ -99,7 +121,7 @@ class UserProfileForm(forms.ModelForm):
     bio = forms.CharField(widget=forms.Textarea, label='')
     class Meta: 
         model = UserProfile
-        fields = ('bio',)
+        fields = ('bio', 'photo',)
 
 
 class EditUserForm(forms.ModelForm):

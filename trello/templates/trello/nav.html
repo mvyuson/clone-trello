@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-warning pt-0">
-    <a class="navbar-brand text-white" href="{% url 'user-profile' %}">{{ user.username }}</a>
+    <a id="username-header" class="navbar-brand text-white" href="{% url 'user-profile' %}">{{ user.username }}</a>
     <a class="nav-item text-white" href="{% url 'dashboard' %}">Boards</a>
     <button class="btn mr-0 pr-0" id="archive"><span class="text-white">Archive</span></button>
     <span class="navbar-brand text-white m-auto pl-0 pr-5"><em><b>Trello</b></em></span>
@@ -8,19 +8,3 @@
         <a class="navbar-item text-white" href="{% url 'logout' %}">Logout</a>
     </div>
 </nav>
-<!-- <div class="page-header bg-warning mt-0 mb-0">
-    <div class="dropdown" id="list-dropdown">
-        <a class="btn text-white mt-3" href="{% url 'user-profile' %}">{{ user.username }}</a>
-    </div>
-    <div class="header-board pr-0">
-        <a class="mr-3 float-left" href="{% url 'dashboard' %}">Boards</a>
-        <button class="btn p-0" id="archive"><span class="text-white">Archive</span></button>
-    </div>
-    <div class="container d-flex justify-content-between ml-0 pl-5 pb-0 pt-0" id="trello-header">
-        <h3 class="text-white p-0"><em>Trello</em></h3>
-    </div>
-    <div class="side" id="logout">
-        <a class="p-0 mt-3 mr-3" href="{% url 'logout' %}">Logout</a>
-        <button class="btn p-0" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span class="p-0" id='add-board'><b>+</b></span></button>
-    </div>
-</div> -->
