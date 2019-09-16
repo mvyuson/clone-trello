@@ -91,12 +91,12 @@
                                             <a href="{% url 'drag-and-drop' card.id %}">
                                                 <a href="" data-toggle="modal" data-remote="{% url 'description' id=card.id %}" data-target="#modal-card">
                                                     <h4 class="addcard w-100" id="card">
-                                                            <div class="container-fluid mb-3" id="card_cover_image">
-                                                                    {% for cardimage in card.cardimage_set.all %}
-                                                                        <img src="{{ cardimage.image.url }}" class="mt-4 img-responsive" id="board_card_cover">
-                                                                    {% endfor %}
-                                                            </div>
-                                                        <span id="card-text">{{ card }}</span>
+                                                        <div class="container-fluid mb-3" id="card_cover_image">
+                                                            {% if card.image %}
+                                                                <img src="{{ card.image.url }}" class="mt-4 img-responsive" id="board_card_cover">
+                                                            {% endif %}
+                                                        </div>
+                                                        <span class="mt-5" id="card-text">{{ card }}</span>
                                                         <button class="btn float-right" id="description">
                                                             <span class="glyphicon glyphicon-pencil" id="pencil"></span>
                                                         </button>

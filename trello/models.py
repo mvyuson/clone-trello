@@ -22,21 +22,14 @@ class Card(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     card_title = models.CharField(max_length=200)
     card_description = models.TextField(null=True)
+    image = models.ImageField(upload_to='images/', null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
+    
 
     def __str__(self):
         return self.card_title
-
-
-class CardImage(models.Model):
-    card = models.ForeignKey('Card', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='images/')
-    empty = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f'{self.card.id}'
 
 
 class List(models.Model):
@@ -101,20 +94,22 @@ class BoardInvite(models.Model):
 
 
 class UserProfile(models.Model):
+    """
+    User Profile
+    """
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='images/', null=True, blank=True)
     bio = models.TextField(default='')
 
 
 def create_user_profile(sender, instance, created, **kwargs):
+    """
+    Create user profile every time a user was created
+    'created' is a Signal instance that is use to create a user profile
+    'post_save.connect' creates UserProfile after the User was created
+    """
+
     if created:
         user_profile = UserProfile.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=User)
-
-
-def update_user_profile(sender, instance, update_fields, **kwargs):
-    if update_fields:
-        user = self.user.save(update_fields=['username', 'email'])
-
-post_save.connect(update_user_profile, sender=UserProfile)

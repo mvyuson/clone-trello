@@ -1,5 +1,5 @@
-from .models import Board, List, Card, BoardMembers, CardImage, UserProfile
-from django.contrib.auth.forms import UserCreationForm
+from .models import Board, List, Card, BoardMembers, UserProfile
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from django import forms
 
@@ -89,6 +89,15 @@ class AddListForm(forms.ModelForm):
         fields = ('list_title',)
 
 
+class EditCardTitleForm(forms.ModelForm):
+    card_title = forms.CharField(widget=forms.TextInput, label='', required=False)
+    card_description = forms.CharField(widget=forms.Textarea, label='', required=False)
+
+    class Meta:
+        model = Card 
+        fields = ('card_title', 'card_description',)
+
+
 class InviteMemberForm(forms.ModelForm):
     members = forms.ModelChoiceField(
         queryset=User.objects.all(), 
@@ -113,21 +122,21 @@ class InviteMemberForm(forms.ModelForm):
 
 class CardImageForm(forms.ModelForm):
     class Meta:
-        model = CardImage
+        model = Card
         fields = {'image'}
 
 
-class UserProfileForm(forms.ModelForm):
-    bio = forms.CharField(widget=forms.Textarea, label='')
-    class Meta: 
-        model = UserProfile
-        fields = ('bio', 'photo',)
-
-
 class EditUserForm(forms.ModelForm):
-    username = forms.CharField(widget=forms.TextInput, label='')
-    email = forms.CharField(widget=forms.EmailInput, label='')
+    username = forms.CharField(widget=forms.TextInput, required=False)
+    email = forms.CharField(widget=forms.EmailInput, required=False)
 
     class Meta:
         model = User 
         fields = ('username', 'email')
+
+
+class UserProfileForm(forms.ModelForm):
+    bio = forms.CharField(widget=forms.Textarea, required=False)
+    class Meta: 
+        model = UserProfile
+        fields = ('bio',)
