@@ -23,7 +23,8 @@ from .forms import (
     AddListForm, 
     CardImageForm,
     UserProfileForm,
-    EditUserForm
+    EditUserForm,
+    EditCardTitleForm,
 )
 
 from .models import (
@@ -31,8 +32,7 @@ from .models import (
     List, 
     Board, 
     BoardMembers, 
-    BoardInvite, 
-    CardImage, 
+    BoardInvite,  
     UserProfile
 )
 
@@ -140,12 +140,12 @@ class DashBoardView(LoginRequiredMixin, TemplateView):
     def get(self, *args, **kwargs):
         board = Board.objects.filter(author=self.request.user, archived=False).order_by('id')
         board_member = BoardMembers.objects.filter(members=self.request.user).order_by('id')
-        card_image = CardImage.objects.all()
         board_owner = BoardMembers.objects.filter(owner=True)
-        return render(self.request, self.template_name, {'board':board, 'board_member':board_member, 'board_owner':board_owner, 'card_image':card_image})
+        context = {'board':board, 'board_member':board_member, 'board_owner':board_owner}
+        return render(self.request, self.template_name, context)
  
 
-class CreateBoardView(TemplateView):
+class CreateBoardView(LoginRequiredMixin, TemplateView):
     """
     When 'Create Board' is clicked, add board form will render.
     Redirect to board with the saved board title.
@@ -176,15 +176,14 @@ class CreateBoardView(TemplateView):
             board = form.save(commit=False)
             board.author = self.request.user
             board.save()
-            create_board_member = BoardMembers.objects.create(board=board, members=self.request.user, deactivate=False, owner=True)
-            create_board_member.save()
+            BoardMembers.objects.create(board=board, members=self.request.user, owner=True)
             return JsonResponse({'board':board.id})    
         else:
             return HttpResponse(status=400)
         return render(self.request, self.template_name,  {'form':form})
 
 
-class BoardView(TemplateView):
+class BoardView(LoginRequiredMixin, TemplateView):
     """
     Display the board details by returning the board, board_members, and other forms to the template.
     Get the current Board and save the newly added list
@@ -199,19 +198,11 @@ class BoardView(TemplateView):
         Get the kwargs of board_list
         """
 
-        if self.request.POST.get('card_title'):
-            card_list = get_object_or_404(List, id=kwargs.get('id'))
-            title = self.request.POST.get('card_title')
-            card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
-            card.save()
-            return JsonResponse({'card':card.card_title, 'id':card.id})
-
+        form = self.form()
         board = get_object_or_404(Board, id=kwargs.get("id")) 
         board_members = BoardMembers.objects.filter(board=board).order_by('id')
-        form = self.form()
         board_form = self.board_form(self.request.POST, instance=board)
-        card_image = CardImage.objects.all().first()
-        context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form, 'card_image':card_image}
+        context = {'board':board, 'board_members':board_members, 'form':form, 'board_form':board_form}
         return render(self.request, self.template_name, context)    
 
     def post(self, *args, **kwargs):
@@ -227,64 +218,60 @@ class BoardView(TemplateView):
         return render(self.request, self.template_name, {'form':form})
 
 
-class AddCardView(TemplateView):
+class AddCardView(LoginRequiredMixin, TemplateView):
     """
     Add a newly created card.
+    card_list gets the id of the current List
+    title gets the newly added card
+
     """
 
     def post(self, request, *args, **kwargs):
-        if self.request.POST.get('card_title'):
-            card_list = get_object_or_404(List, id=kwargs.get('id'))
-            title = self.request.POST.get('card_title')
-            card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
-            card.save()
-            return JsonResponse({'card':card.card_title, 'id':card.id})
+        card_list = get_object_or_404(List, id=kwargs.get('id'))
+        title = self.request.POST.get('card_title')
+        card = Card.objects.create(card_title=title, board_list=card_list, author=self.request.user)
+        return JsonResponse({'card':card.card_title, 'id':card.id})
 
 
-class CardDescriptionView(TemplateView):
+class CardDescriptionView(LoginRequiredMixin, TemplateView):
     """
+    Blockers: Returns an empty card_title when its only description that is being updated.
+
     Display the card detail of a card inside the modal.
     """
 
     template_name = 'trello/description.html'
     form = CardImageForm
+    title_form = EditCardTitleForm
 
     def get(self, *args, **kwargs):
-        form = self.form()
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        #import pdb; pdb.set_trace()
-        card_image = CardImage.objects.filter(card=card)
-        print(card_image)
-        #card_image = CardImage.objects.all()
-        context = {'card':card, 'board_list':card.board_list.id, 'card_image':card_image, 'form':form}
+        form = self.form()
+        title_form = self.title_form(instance=card)
+        context = {'form':form, 'title_form':title_form, 'card':card}
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        card = get_object_or_404(Card, id=kwargs.get('id')) 
-        update_card = self.request.POST.get('card_title') 
-        update_description = self.request.POST.get('card_description') 
-        
-        current_card = Card.objects.get(id=card.id)
-        current_description = Card.objects.get(id=card.id)
-        proxy_description = current_description.card_description
+        #import pdb; pdb.set_trace()
+        card = get_object_or_404(Card, id=kwargs.get('id'))
+        title_form = self.title_form(self.request.POST, instance=card)
 
-        if update_card is None:
-            current_card.card = card 
-        else:
-            current_card.card_title = update_card
-        
-        if update_description is None:
-            current_card.card_description = current_description.card_description
-        else:
-            current_card.card_description = update_description
+        if title_form.is_valid():
+            update_card = title_form.save(commit=False)
+           
+            if update_card.card_title is None:
+                update_card.card_title = card.card_title
+                print('WALA')
 
-        print(current_card.card_title)
-        current_card.save()
-        return JsonResponse({'card':current_card.card_title, 'id':current_card.id, 'card_description': current_card.card_description, 'board': current_card.board_list.board.id})
+            print(card.card_title)
+            update_card.author = self.request.user 
+            update_card.board_list = card.board_list 
+            update_card.save()
+            return JsonResponse({'card': update_card.card_title, 'id': update_card.id, 'card_description': update_card.card_description, 'board': update_card.board_list.board.id})
+        return render(self.request, self.template_name, {'form':title_form})
 
 
-
-class CardDragAndDropView(View):
+class CardDragAndDropView(LoginRequiredMixin, View):
     """
     Drag and drop card to a list and update it's list.
     1. Get the value of the dragged and dropped card, and the value of 
@@ -297,7 +284,6 @@ class CardDragAndDropView(View):
     def post (self, *args, **kwargs):
         drop_list = self.request.POST.get('blist')
         card = self.request.POST.get('card')
-        drop_card = get_object_or_404(Card, id=kwargs.get('id'))
         current_card = Card.objects.get(id=card)
         current_list = List.objects.get(id=drop_list)
         current_card.board_list = current_list
@@ -305,7 +291,7 @@ class CardDragAndDropView(View):
         return JsonResponse({'card':current_card.id})
 
 
-class UpdateBoard(TemplateView):
+class UpdateBoard(LoginRequiredMixin, TemplateView):
     """
     Update the value of the board title.
     1. Get the new value of the current board.
@@ -313,15 +299,15 @@ class UpdateBoard(TemplateView):
     """
 
     def post(self, *args, **kwargs):
-        update_board = self.request.POST.get('board_title') 
         board = get_object_or_404(Board, id=kwargs.get('id'))
+        update_board = self.request.POST.get('board_title') 
         current_board = Board.objects.get(id=board.id)
         current_board.title = update_board 
         current_board.save()
         return JsonResponse({'board':current_board.title})
 
 
-class UpdateListView(TemplateView):
+class UpdateListView(LoginRequiredMixin, TemplateView):
     """
     Update the value of the list title.
     1. Get the new list value from the frontend.
@@ -333,15 +319,13 @@ class UpdateListView(TemplateView):
     def post(self, *args, **kwargs):
         edit_list = self.request.POST.get('list_data')     
         list_id = self.request.POST.get('list_id')      
-        current_list = get_object_or_404(List, id=kwargs.get('id')) 
         update_list = List.objects.get(id=list_id)
         update_list.list_title = edit_list
-        print(update_list.list_title)
         update_list.save()
         return JsonResponse({'board_list':update_list.id})
 
 
-class DeleteBoardView(DeleteView):
+class DeleteBoardView(LoginRequiredMixin, DeleteView):
     """
     Delete the current Board.
     """
@@ -352,7 +336,7 @@ class DeleteBoardView(DeleteView):
         return redirect('dashboard')
 
 
-class DeleteListView(DeleteView):
+class DeleteListView(LoginRequiredMixin, DeleteView):
     """
     Delete the current List.
     """
@@ -364,19 +348,18 @@ class DeleteListView(DeleteView):
         return redirect('board', board)
 
 
-class DeleteCardView(DeleteView):
+class DeleteCardView(LoginRequiredMixin, DeleteView):
     """
     Delete the current Card.
     """
 
     def get(self, *args, **kwargs):
         card_to_delete = get_object_or_404(Card, id=kwargs.get('id'))
-        board = card_to_delete.board_list.board.id 
         card_to_delete.delete()
-        return redirect('board', board)
+        return redirect('board', card_to_delete.board_list.board.id )
 
 
-class BoardArchiveView(View):
+class BoardArchiveView(LoginRequiredMixin, View):
     """
     Archive Board by setting its archived field into True.
     """
@@ -388,7 +371,7 @@ class BoardArchiveView(View):
         return JsonResponse({'board':board.id})
 
 
-class RestoreArchivedBoard(View):
+class RestoreArchivedBoard(LoginRequiredMixin, View):
     """
     Restore Archived Board
     """
@@ -400,7 +383,7 @@ class RestoreArchivedBoard(View):
         return redirect('dashboard')
 
 
-class RestoreArchivedList(View):
+class RestoreArchivedList(LoginRequiredMixin, View):
     """
     Restore Archived List
     """
@@ -412,7 +395,7 @@ class RestoreArchivedList(View):
         return redirect('board', board_list.board.id)
 
 
-class RestoreArchivedCard(View):
+class RestoreArchivedCard(LoginRequiredMixin, View):
     """
     Restore Archived Card
     """
@@ -424,7 +407,7 @@ class RestoreArchivedCard(View):
         return redirect('board', card.board_list.board.id)
 
 
-class ListArchiveView(View):
+class ListArchiveView(LoginRequiredMixin, View):
     """
     Archive List by setting its archived field into True.
     """
@@ -436,7 +419,7 @@ class ListArchiveView(View):
         return JsonResponse({'board':board_list.board.id})
 
 
-class CardArchiveView(View):
+class CardArchiveView(LoginRequiredMixin, View):
     """
     Archive Card by setting its archived field into True.
     """
@@ -448,7 +431,7 @@ class CardArchiveView(View):
         return JsonResponse({'board':card.board_list.board.id})
 
 
-class ArchiveView(TemplateView):
+class ArchiveView(LoginRequiredMixin, TemplateView):
     """
     Display the archive boards, lists, and cards in one template order by the date it was created.
     1. Get all the boards with the current user as the author, and if archived is equal to true, order
@@ -469,8 +452,10 @@ class ArchiveView(TemplateView):
         return render(self.request, self.template_name, context)
 
 
-class InviteMemberView(TemplateView):
+class InviteMemberView(LoginRequiredMixin, TemplateView):
     """
+    NOT UPDATED
+
     Invite other user as a member of the board. The user will enter the username of the member
     and submit it. Then activate its membership. Then set the current user as the owner of the 
     board. Then redirect it to Board Details.
@@ -499,8 +484,7 @@ class InviteMemberView(TemplateView):
             self.send_email_msg(message, member_email)
 
             current_member = User.objects.get(email=member_email)
-            new_board_member = BoardMembers.objects.create(board=board, members=current_member, deactivate=False, owner=False)
-            new_board_member.save()
+            new_board_member = BoardMembers.objects.create(board=board, members=current_member)
 
             return redirect('board', board.id)
         else:
@@ -508,12 +492,16 @@ class InviteMemberView(TemplateView):
             self.send_email_msg(message, member_email)
             
             initial_member = BoardInvite.objects.create(board=board, email_member=member_email)
-            initial_member.save()
 
             return redirect('board', board.id)
 
 
-class RegisterInvitedUser(View):
+class RegisterInvitedUser(LoginRequiredMixin, View):
+    """
+    NOT UPDATED
+    """
+
+
     form = SignUpForm
     template_name = "trello/register_invited_user.html"
 
@@ -547,7 +535,7 @@ class RegisterInvitedUser(View):
         return render(self.request, self.template_name, {'form':form})
         
 
-class LeaveBoardView(View):
+class LeaveBoardView(LoginRequiredMixin, View):
     """
     Let the user who is a member of the board to leave by setting the deactivating its membership.
     """
@@ -561,65 +549,62 @@ class LeaveBoardView(View):
         return redirect('dashboard')
 
 
-class EditUserProfile(TemplateView):
+class EditUserProfile(LoginRequiredMixin, TemplateView):
+    """
+    Add bio and edit user profile 
+    """
+    
     template_name = 'trello/user_profile.html'
+    user_form = EditUserForm
+    user_profile_form = UserProfileForm
 
     def get(self, *args, **kwargs):
-        user = UserProfile.objects.get(user=self.request.user)
-        print(user)
-        context = {'userprofile':user}
+        user_form = self.user_form(instance=self.request.user)
+        user_profile_form = self.user_profile_form(instance=self.request.user.userprofile)
+        context = {'userprofile':self.request.user, 'user_form':user_form, 'user_profile_form':user_profile_form}
         return render(self.request, self.template_name, context)
 
     def post(self, *args, **kwargs):
-        update_username = self.request.POST.get('profile_username')
-        update_email = self.request.POST.get('profile_email')
-        update_bio = self.request.POST.get('profile_bio')
-        user = User.objects.get(id=self.request.user.id)
-        user.username = update_username
-        user.email = update_email
-        user.save()
-        user_profile = UserProfile.objects.get(user=user)
-        user_profile.bio = update_bio
-        user_profile.save()
-        print('User Edited')
-        # return redirect('user-profile')
-        return JsonResponse({'user':user.username})
+        user_form = self.user_form(self.request.POST, instance=self.request.user)
+        user_profile_form = self.user_profile_form(self.request.POST, instance=self.request.user.userprofile)        
+
+        if user_form.is_valid() or user_profile_form.is_valid():
+            user = user_form.save()
+            user_profile = user_profile_form.save(commit=False)
+            user_profile.user = user
+            user_profile.save()
+            return redirect('user-profile')
+        return render(self.request, self.template_name, {'user_form':user_form, 'user_profile_form':user_profile_form})
 
 
-class DeleteCardCoverImage(DeleteView):
+class DeleteCardCoverImage(LoginRequiredMixin, DeleteView):
+    """
+    Delete Card Image
+    """
+    
     def get(self, *args, **kwargs):
         card = get_object_or_404(Card, id=kwargs.get('id'))
-        CardImage.objects.filter(card=card).delete()
+        card.image = None
+        card.save()
         return JsonResponse({'card':card.id})
 
 
-class UploadImageView(View):
+class UploadImageView(LoginRequiredMixin, View):
+    """
+    Upload Card Image
+    """
+    
     template_name = 'trello/description.html'
     form = CardImageForm
 
     def post(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        form = self.form(self.request.POST, self.request.FILES)
         parent_card = get_object_or_404(Card, id=kwargs.get('id'))
-        images = CardImage.objects.filter(card=parent_card)
+        form = self.form(self.request.POST, self.request.FILES, instance=parent_card)
 
-        if images is None:
-            pass 
-        else:
-            CardImage.objects.filter(card=parent_card).delete()
-            
         if form.is_valid():
-            card_image = form.save(commit=False)
-            this_card = CardImage.objects.filter(card=parent_card)
-            if this_card.exists():
-                return redirect('board', parent_card.board_list.board.id)
-            else:
-                card_image.card = parent_card
-                card_image.empty=True
-                str_card_image = str(card_image.image)
-                print(str_card_image)
-                print(card_image.image.url)
-                card_image.save()
-                return redirect('board', parent_card.board_list.board.id)
-        else:
-            return HttpResponse(status=400)
+           new_image = form.save(commit=False)
+           new_image.author = self.request.user
+           new_image.board_list = parent_card.board_list
+           new_image.save()
+           return redirect('board', parent_card.board_list.board.id)
+        return render(self.request, self.template_name, {'form':form})
