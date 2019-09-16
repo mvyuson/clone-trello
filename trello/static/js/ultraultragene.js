@@ -13,9 +13,8 @@ $(document).ready(function (){
     cardDraggable();
     leaveBoard();
     mouseoutBoard();
-    editUser();
-    updateUser();
-    closeUserForm();
+    deleteCardCover();
+    uploadCardImage()
 
 
     $('#modal-card').on('shown.bs.modal', function (e) {
@@ -28,6 +27,8 @@ $(document).ready(function (){
         }).done(function(response){
             modal.find('.modal-body').html(response);
             archiveCard();
+            uploadCardImage();
+            createCardDescription();
         });
     });
 
@@ -65,7 +66,7 @@ function createList(){
                             ...
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="archive-list text-dark ml-5" id="archive-list" href="" data-id=${data.id}>Archive List</a>
+                            <a class="archive-list-{{ list.id }} text-dark ml-5" id="archive-list" href="" data-title=${data.board_list} data-id=${data.id}>Archive List</a>
                         </div>
                         </div>
                         </div>
@@ -82,6 +83,8 @@ function createList(){
                         `;  
             $('#list-board').append(template);
             $('#list-form').trigger('reset');
+            console.log('GGG');
+            archiveList();
             createCard();
         }).fail(function(data){
             console.log("error")
@@ -105,7 +108,7 @@ function createCard(){
                                 <a href="/drag-and-drop/${data.id}/">
                                 <a href="" data-toggle="modal" data-remote="/description/${data.id}" data-target="#modal-card">
                                 <h4 class="addcard w-100 pt-3" data-id="${data.id}" id="card">
-                                    ${data.card}
+                                    <span id="card-text">${data.card}</span>
                                 <button class="btn float-right" id="description">
                                     <span class="glyphicon glyphicon-pencil" id="pencil"></span>
                                 </button>
@@ -131,80 +134,76 @@ function editCard(){
     $(document).on('click', '.card-title-description', function(e){
         e.preventDefault();
         $(this).hide();
-        $('#updateCardForm').show();
+        $('#id_card_title').show();
         updateCard();
         mouseoutBoard();
+        console.log('Edit Card');
     })
 }
 
 function updateCard(){
-    $('#card-edit-form').on('submit', function(e){
+    $('#card_form').on('submit', function(e){
         e.preventDefault();
 
-        var title = $(this).find('input').val();
-        var description = $('#card-description').data('title');
-        console.log('card_title:', title, 'card_description: ', description);
+        var title = $(this).find("input[name='card_title']").val();
 
         if(title.length < 1){
             $('#card-error').show();
         }else{
             $.ajax({
                 url: $(this).attr('action'),
-                data: {card_title: title, card_description: description},
+                data: $(this).serialize(),
                 method: 'POST'
             }).done(function(data){
-                e.preventDefault();
                 $('.card-title-description').show();
                 $('header').find('.card-title-description').html(data.card);
                 console.log(data.board, data.card);
-    
+                $('#id_card_title').hide();
+
                 $.ajax({
                     url: '/board/'+data.board,
-                    method: 'get'
+                    method: 'Get'
                 }).done(function(res){
-                    var card_con = $(`.card-content-${ data.id }`);
-                    $('body').find('.card-body').find(card_con).find('h4').html(data.card);
-                    console.log('board'+data.board);
+                    var card_con = $(`.card-content-${data.id}`);
+                    $('body').find('.card-body').find(card_con).find('h4').find('#card-text').html(data.card);
+                    $('.card-title-description').html(data.card);
                     $('#card-error').hide();
                 })
-    
-                $('#updateCardForm').hide();
-            });
+            })
         }
-    });
-}
 
-function addCardDescription(){
-    $('#card-description').on('submit', function(e){
-        e.preventDefault();
-        var description = $(this).find('textarea').val();
-        var title = $('header').find('#card-edit-form').data('title');
-        //var title= $(this).data('title');
-        console.log('card description', description, 'card: ', title);
-
-        $.ajax({
-            url: $(this).attr('action'),
-            data: {card_title: title, card_description: description},
-            method: 'POST'
-        }).done(function(data){
-            $('.card2').show();
-            $('body').find('.card2').html(data.card_description);
-            $('#add-card-description').hide();
-            $('#save-button').hide();
-        }).fail(function(err){
-            console.log(err);
-        });
     })
 }
 
 function createCardDescription(){
     $('.card').on('click', function(e){
         $('.card2').hide();
-        console.log('KOKOKOKO');
-        $('#add-card-description').show();
-        $('#save-button').show();
+        $('#description_form').show();
         addCardDescription();
         mouseoutBoard();
+    })
+}
+
+function addCardDescription(){
+    $(document).on('submit', '#description_form', function(e){
+        e.preventDefault();
+
+        var description = $(this).find('textarea').val();
+        var title = $('header').find('#card_form').data('title');
+
+        console.log(description, title, 'CARD');
+
+        $.ajax({
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            method: 'POST'
+        }).done(function(data){
+            $('.card2').show();
+            $('body').find('.card2').html(data.card_description);
+            $('#description_form').hide();
+        }).fail(function(err){
+            console.log(err);
+        })
     })
 }
 
@@ -351,8 +350,8 @@ function mouseoutBoard(){
     $(document).mouseup(function(e){
 
         var con = $('#board-edit-form');
-        var con2 = $('#card-edit-form');
-        var con3 = $('#card-description');
+        var con2 = $('#id_card_title');
+        var con3 = $('.description');
 
         if(!con.is(e.target) && con.has(e.target).length === 0){
             $('.board-title').show();
@@ -364,13 +363,13 @@ function mouseoutBoard(){
 
         if(!con2.is(e.target) && con2.has(e.target).length === 0){
             $('.card-title-description').show();
-            $('#updateCardForm').hide();
+            $('#id_card_title').hide();
+            $('#card-error').hide();
         }
 
         if(!con3.is(e.target) && con3.has(e.target).length === 0){
             $('.card2').show();
-            $('#add-card-description').hide();
-            $('#save-button').hide();
+            $('#description_form').hide();
             
         }
     });
@@ -410,7 +409,7 @@ function uploadCoverImage(){
 
 
 function leaveBoard(){
-    $('#leave-board').on('click', function(e){
+    $(document).on('click', '#leave-board', function(e){
         e.preventDefault();
         $.ajax({
             url: $(this).attr('href'),
@@ -439,15 +438,17 @@ function archiveBoard(){
 }
 
 function archiveList(){
-    $(document).on('click', '#archive-list', function(e){
+    $('#archive-list').on('click', function(e){
         e.preventDefault();
         var archive = $(this).data('id');
+        console.log
         console.log('asd');
         $.ajax({
             url: $(this).attr('href'),
             method: 'get',
         }).done(function(res){
-            $('#archive-list').parents('.cc').remove();
+            var card_con = $(`.list-content-${archive}`);
+            $(card_con).parents('.cc').remove();
             console.log('Archive List');
         }).fail(function(err){
             console.log(err);
@@ -475,55 +476,35 @@ function archiveCard(){
 
 function deleteCardCover(){
     $(document).on('click', '#delete-cover-img', function(e){
+        console.log('NACLICK KO');
         e.preventDefault();
-        var delete_image = $(this).find('#card-image').find('a').data('id');
+        var delete_image = $(this).find('#card-image');
+        var card = $(this).data('id');
         console.log('Delete Cover', delete_image);
-    })
+        $.ajax({
+            url: $(this).attr('href'),
+            method: 'Get'
+        }).done(function(res){
+            $('#card_image').remove();
+            var card_con = $(`.card-content-${ card }`);
+            $('body').find('.card-body').find(card_con).find('h4').find('#card_cover_image').remove();
+        }).fail(function(err){
+            console.log(err);
+        });
+    });
 }
 
-function editUser(){
-    $(document).on('click', '#edit-user', function(e){
-        console.log('Edit User')
-        $('#id_username').show();
-        $('#id_email').show();
-        $('#close-user-form').show();
-        $('#profile-username').hide();
-        $('#profile-email').hide();
-        updateUser();
-    })
-}
-
-function closeUserForm(){
-    $(document).on('click', '#close-user-form', function(e){
-        $('#id_username').hide();
-        $('#id_email').hide();
-        $('#close-user-form').hide()
-        $('#profile-username').show();
-        $('#profile-email').show();
-    })
-}
-
-function updateUser(){
-    $('#user-form').on('submit', function(e){
-        console.log('User FORM');
+function uploadCardImage(){
+    $(document).on('submit', '#cover-image-form', function(e){
+        console.log('Upload Image');
         e.preventDefault();
+        var formdata = new FormData(this);
         $.ajax({
             url: $(this).attr('action'),
-            data: $(this).serialize(),
+            data: formdata,
             method: 'POST'
         }).done(function(data){
-            console.log('FORM, FORM')
-            $('#profile-username').text(data.username);
-            $('#profile-email').text(data.email)
-            $('#id_bio').val(data.bio)
 
-            $('#id_username').hide();
-            $('#id_email').hide();
-            $('#close-user-form').hide()
-            $('#profile-username').show();
-            $('#profile-email').show();
         })
     })
 }
-
-
