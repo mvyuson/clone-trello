@@ -1,42 +1,42 @@
-from django.views.generic.edit import DeleteView, UpdateView
-from django.views.generic import TemplateView, RedirectView, View
-from django.template.loader import render_to_string
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth import update_session_auth_hash
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
-from django.urls import reverse
-from django.utils import timezone
-from django.conf import settings
+# from django.views.generic.edit import DeleteView, UpdateView
+# from django.views.generic import TemplateView, RedirectView, View
+# from django.template.loader import render_to_string
+# from django.contrib.auth.forms import PasswordChangeForm
+# from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.mixins import LoginRequiredMixin
+# from django.contrib.auth.models import User
+# from django.contrib.auth import authenticate, login, logout
+# from django.contrib.auth import update_session_auth_hash
+# from django.contrib import messages
+# from django.core.mail import send_mail
+# from django.shortcuts import render, redirect, get_object_or_404
+# from django.http import HttpResponse, JsonResponse
+# from django.urls import reverse
+# from django.utils import timezone
+# from django.conf import settings
 
 
-from .forms import (
-    SignUpForm, 
-    LoginForm, 
-    AddBoardTitleForm, 
-    AddListForm, 
-    CardImageForm,
-    UserProfileForm,
-    EditUserForm
-)
+# from .forms import (
+#     SignUpForm, 
+#     LoginForm, 
+#     AddBoardTitleForm, 
+#     AddListForm, 
+#     CardImageForm,
+#     UserProfileForm,
+#     EditUserForm
+# )
 
-from .models import (
-    Card, 
-    List, 
-    Board, 
-    BoardMembers, 
-    BoardInvite, 
-    CardImage, 
-    UserProfile
-)
+# from .models import (
+#     Card, 
+#     List, 
+#     Board, 
+#     BoardMembers, 
+#     BoardInvite, 
+#     CardImage, 
+#     UserProfile
+# )
 
-import json
+# import json
 
 
 """
