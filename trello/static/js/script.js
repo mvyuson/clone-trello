@@ -20,7 +20,7 @@ $(document).ready(function (){
     $('#modal-card').on('shown.bs.modal', function (e) {
         var remoteUrl = $(e.relatedTarget).data('remote');
         var modal = $(this);
-        console.log('MMMMM');
+        
         $.ajax({
             'method': 'get',
             'url': remoteUrl
@@ -83,7 +83,7 @@ function createList(){
                         `;  
             $('#list-board').append(template);
             $('#list-form').trigger('reset');
-            console.log('GGG');
+            
             archiveList();
             createCard();
         }).fail(function(data){
@@ -97,7 +97,7 @@ function createCard(){
     $('.create-card').on('submit', function(e){
         e.preventDefault();
         var parent_list = $(this).parents('.card').data('id');
-        console.log('CCC');
+        
         $.ajax({
             url: $(this).attr('action'),
             data: $(this).serialize(),
@@ -137,8 +137,7 @@ function editCard(){
         $('#id_card_title').show();
         updateCard();
         mouseoutBoard();
-        console.log('Edit Card');
-    })
+    });
 }
 
 function updateCard(){
@@ -157,7 +156,6 @@ function updateCard(){
             }).done(function(data){
                 $('.card-title-description').show();
                 $('header').find('.card-title-description').html(data.card);
-                console.log(data.board, data.card);
                 $('#id_card_title').hide();
 
                 $.ajax({
@@ -168,11 +166,10 @@ function updateCard(){
                     $('body').find('.card-body').find(card_con).find('h4').find('#card-text').html(data.card);
                     $('.card-title-description').html(data.card);
                     $('#card-error').hide();
-                })
-            })
+                });
+            });
         }
-
-    })
+    });
 }
 
 function createCardDescription(){
@@ -191,8 +188,6 @@ function addCardDescription(){
         var description = $(this).find('textarea').val();
         var title = $('header').find('#card_form').data('title');
 
-        console.log(description, title, 'CARD');
-
         $.ajax({
             url: $(this).attr('action'),
             data: $(this).serialize(),
@@ -203,8 +198,8 @@ function addCardDescription(){
             $('#description_form').hide();
         }).fail(function(err){
             console.log(err);
-        })
-    })
+        });
+    });
 }
 
 function cardDraggable(){
@@ -231,7 +226,7 @@ function cardDraggable(){
                 data: {blist: list_id, card: card_id}
             }).done(function(data){
                 console.log(data);
-            })
+            });
         }
     });
 }
@@ -255,7 +250,6 @@ function editList(){
 
                 if(edit < 1){
                     var gogo = $(list_con).parents('.cc').find('#cc-span').html(template).css({"color": "red", "font-size": "12px", "font-weight":"normal"});
-                    console.log('ERRROR', `.list-content-${list_id}`);
 
                     var con = $('.list-span');
 
@@ -271,7 +265,6 @@ function editList(){
                         method: 'POST',
                         data: {list_data: update_list, list_id: update_list_id}
                     }).done(function(data){
-                        console.log('AAAAAAAaa');
                         $(editList).blur();
                         $(editList).css({"background-color": "transparent"});
                         $(list_con).parents('.cc').find('#cc-span').html(template).css({"color": "transparent", "font-size": "12px", "font-weight":"normal"});
@@ -283,7 +276,7 @@ function editList(){
                 $(this).text(value);
             }
         });
-    })
+    });
 
     $(document).mouseup(function(e){
         var con = $('.list-span');
@@ -400,7 +393,7 @@ function uploadCoverImage(){
             data: $(this).serialize(),
             method: 'POST'
         }).done(function(data){
-            console.log('JOJOJOOOO');
+            console.log('Success');
         }).fail(function(err){
             console.log(err);
         })
@@ -441,15 +434,13 @@ function archiveList(){
     $('#archive-list').on('click', function(e){
         e.preventDefault();
         var archive = $(this).data('id');
-        console.log
-        console.log('asd');
+
         $.ajax({
             url: $(this).attr('href'),
             method: 'get',
         }).done(function(res){
             var card_con = $(`.list-content-${archive}`);
             $(card_con).parents('.cc').remove();
-            console.log('Archive List');
         }).fail(function(err){
             console.log(err);
         });
@@ -460,14 +451,13 @@ function archiveCard(){
     $(document).on('click', '#arch-card',function(e){
         e.preventDefault();
         var archive = $(this).data('id');
-        console.log('card', archive);
+
         $.ajax({
             url: $(this).attr('href'),
             method: 'Get'
         }).done(function(res){
             var card_con = $(`.card-content-${archive}`);
             $(card_con).find('h4').remove();
-            console.log('Archive Card');
         }).fail(function(err){
             console.log(err)
         });
@@ -476,16 +466,17 @@ function archiveCard(){
 
 function deleteCardCover(){
     $(document).on('click', '#delete-cover-img', function(e){
-        console.log('NACLICK KO');
+        
         e.preventDefault();
         var delete_image = $(this).find('#card-image');
         var card = $(this).data('id');
-        console.log('Delete Cover', delete_image);
+        
         $.ajax({
             url: $(this).attr('href'),
             method: 'Get'
         }).done(function(res){
             $('#card_image').remove();
+
             var card_con = $(`.card-content-${ card }`);
             $('body').find('.card-body').find(card_con).find('h4').find('#card_cover_image').remove();
         }).fail(function(err){
@@ -496,7 +487,6 @@ function deleteCardCover(){
 
 function uploadCardImage(){
     $(document).on('submit', '#cover-image-form', function(e){
-        console.log('Upload Image');
         e.preventDefault();
         var formdata = new FormData(this);
         $.ajax({
@@ -505,6 +495,6 @@ function uploadCardImage(){
             method: 'POST'
         }).done(function(data){
 
-        })
-    })
+        });
+    });
 }
