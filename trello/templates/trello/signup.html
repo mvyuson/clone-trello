@@ -4,6 +4,8 @@
 <html>
     <head>
         <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}">
+        <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
         <title>Trello Signup</title>
     </head>
     <body>
@@ -14,16 +16,18 @@
             <form method="POST" novalidate> 
                 {% csrf_token %}
                 <div class="form-group">
-                    {{ form.username|as_crispy_field }}
+                    {{ form.username }}
                 </div>
                 <div class="form-group">
-                    {{ form.email|as_crispy_field }}
+                    {{ form.email }}
                 </div>
                 <div class="form-group">
-                    {{ form.first_password|as_crispy_field }}
+                    {{ form.first_password }}
                 </div>
                 <div class="form-group">
-                    {{ form.second_password|as_crispy_field }}
+                    {{ form.second_password }}
+                </div>
+                
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary mb-2">Sign Up</button>
                     <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>

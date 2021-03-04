@@ -1,17 +1,28 @@
 {% extends 'trello/base.html' %}
 
 {% block content %}
-    <div class="container-fluid mt-3" id="board-list">
-        <h2 class="mb-5">List of Boards</h2>
+    <div class="container-fluid mt" id="board-list">
+        <h2 class="mb-5">Boards</h2>
         <h5 class="mt-3">Personal Boards</h5>
-        {% for b in board %}
-            <ul class="list-unstyled ml-3"><li><a class="text-dark" href="{% url 'board' id=b.id %}">{{ b.title }} </a></li></ul>
-        {% endfor %}
-        <h5 class="mt-5">Invite Boards</h5>
+        <div class="d-flex flex-wrap w-100 justify-content-start">
+            {% for b in board %}
+                <a class="personal-board-link" href="{% url 'board' id=b.id %}">
+                    <div class="board mt-3 mr-3">
+                        <span>{{ b.title }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        
+        <h5 class="mt-5">Invited Boards</h5>
         {% for boards in board_member %}
             {% if boards.deactivate == False %}
                 {% if boards.owner == False %}
-                    <ul class="list-unstyled text-dark ml-3"><li><a class="text-dark" href="{% url 'board' boards.board.id %}">{{ boards.board.title }}</a></li></ul>
+                    <a class="personal-board-link" href="{% url 'board' boards.board.id %}">
+                        <div class="board mt-3 mr-3">
+                            <span>{{ boards.board.title }}</span>
+                        </div>
+                    </a>
                 {% endif %}
             {% endif %}
         {% endfor %}

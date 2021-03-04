@@ -9,10 +9,10 @@ class SignUpForm(forms.ModelForm):
     Creates form for Sign Up. 
     """
     
-    username = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.EmailField(max_length=30, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    first_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    second_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    email = forms.EmailField(max_length=30, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    first_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    second_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}))
 
     class Meta:
         model = User
@@ -50,8 +50,8 @@ class SignUpForm(forms.ModelForm):
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
 
     def clean_username(self):
         """

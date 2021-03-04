@@ -48,9 +48,11 @@ ROLEPERMISSIONS_REGISTER_ADMIN = True
 EMAIL_USE_TLS = True 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'trellodmn@gmail.com'
-EMAIL_HOST_PASSWORD = 'sswrptvyhxuhndyl'
+# EMAIL_HOST_PASSWORD = 'sswrptvyhxuhndyl'
+EMAIL_HOST_PASSWORD = 'trello_admin078'
 DEFAULT_FROM_EMAIL = 'TrelloCloneApp'
 EMAIL_PORT = 587
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

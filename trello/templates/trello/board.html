@@ -1,10 +1,10 @@
 {% extends 'trello/base.html' %}
 {% block content %}
-    <header class="board-header">
+    <header class="board-header mt-1">
         <div class="row board-row">
             <div class="col-5 d-flex justify-content-start mt-0 p-0 mb-5" id="board-title">
                 <div class="dropdown ml-5 mt-2 p-0 float-right" id="board-dropdown">
-                    <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn archive-btn" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         ...
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -19,7 +19,7 @@
                     <p id="board-error" class="update-error">Cannot accept empty board.</p>
                 </h2>
             </div>
-            <div class="col d-flex justify-content-between">
+            <div class="col-5 d-flex justify-content-between">
                 {% for member in board_members %}
                     {% if member.deactivate == False  %}
                         <div class="dropdown show mt-3">
@@ -37,9 +37,9 @@
                     {% endif %}
                 {% endfor %}
             </div>
-            <div class="col">
+            <div class="col-2 invite-btn">
                 <div class="dropdown mt-4" id="invite_dropdown">
-                    <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Invite
                     </button>
                     <div class="dropdown-menu p-3" id="inviteDropdownMenu" aria-labelledby="dropdownMenuButton">
@@ -54,16 +54,16 @@
             </div>
         </div>
     </header>
-    <body>
-            
-        <div class="container float-left ml-5 mt-2" id="list-container">
+    <body style="background-color: #FFC107;">
+        <div class="container float-left mt-3" id="list-container">
             <form id="list-form" action="{% url 'board' board.id %}" method="POST">
                 {% csrf_token %}
                 {{ form.list_title}}
                 {{ form.list_title.errors}}
             </form>
         </div>
-        <div class="container-fluid d-flex flex-wrap w-100 mt-5" id="list-board">
+        <div class="container-fluid d-flex flex-wrap w-100" id="list-board">
+            <hr></hr>
             {% for list in board.list_set.all %}
                 {% if list.archived == False %}
                     <div class="cc list-cc-content-{{ list.id }}">
@@ -76,7 +76,7 @@
                                 <a href="{% url 'edit-list' list.id %}"></a>
                                 
                                 <div class="dropdown p-0 float-right" id="list-dropdown">
-                                <button class="btn " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button class="btn archive-list-btn" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     ...
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -84,7 +84,7 @@
                                 </div>
                                 </div>
                             </div>
-                            <div class="card-body pb-0">
+                            <div class="card-body pt-3 pb-0">
                                 {% for card in list.card_set.all %}
                                     {% if card.archived == False %}
                                         <li class="list-unstyled m-0 card-content-{{ card.id }}" draggable="true" data-id="{{ card.id }}">
