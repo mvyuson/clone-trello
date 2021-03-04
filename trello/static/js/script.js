@@ -13,8 +13,9 @@ $(document).ready(function (){
     cardDraggable();
     leaveBoard();
     mouseoutBoard();
+    uploadCoverImage();
     deleteCardCover();
-    uploadCardImage()
+    // uploadCardImage()
 
 
     $('#modal-card').on('shown.bs.modal', function (e) {
@@ -385,7 +386,7 @@ function createBoard() {
     });
 }
 
-function uploadCoverImage(){
+function uploadCoverImage() {
     $('#cover-image-form').on('submit', function(e){
         e.preventDefault();
         $.ajax({
@@ -485,16 +486,16 @@ function deleteCardCover(){
     });
 }
 
-function uploadCardImage(){
-    $(document).on('submit', '#cover-image-form', function(e){
-        e.preventDefault();
-        var formdata = new FormData(this);
-        $.ajax({
-            url: $(this).attr('action'),
-            data: formdata,
-            method: 'POST'
-        }).done(function(data){
+// function uploadCardImage(){
+//     $(document).on('submit', '#cover-image-form', function(e){
+//         e.preventDefault();
+//         var formdata = new FormData(this);
+//         $.ajax({
+//             url: $(this).attr('action'),
+//             data: formdata,
+//             method: 'POST'
+//         }).done(function(data){
 
-        });
-    });
-}
+//         });
+//     });
+// }

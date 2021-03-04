@@ -1,0 +1,41 @@
+body {
+	background-color: #f5c71a;	
+}
+
+.form-control {
+	border: none !important;
+	border-radius: 0;
+	background-color: #fff !important;
+	font-size: 0.95rem;
+}
+
+.form-control:focus {
+	box-shadow: 0 0 0 0.1rem #e86100;
+	background-color: #fff !important;
+}
+
+button {
+	background-color: #e86100 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    width: 100%;
+    color: #fff !important;
+    opacity: 0.8 !important;
+}
+
+button:hover {
+	opacity: 1 !important;
+}
+
+a, p, span {
+	color: #fff;
+}
+
+a:hover {
+	color: #e86100;
+	text-decoration: none;
+}
+
+label {
+	display: none !important;
+}

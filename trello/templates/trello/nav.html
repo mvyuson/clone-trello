@@ -1,10 +1,20 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-warning pt-0">
+<nav class="navbar navbar-expand-lg navbar-light nav-main pt-0">
     <a id="username-header" class="navbar-brand text-white" href="{% url 'user-profile' %}">{{ user.username }}</a>
     <a class="nav-item text-white" href="{% url 'dashboard' %}">Boards</a>
-    <button class="btn mr-0 pr-0" id="archive"><span class="text-white">Archive</span></button>
-    <span class="navbar-brand text-white m-auto pl-0 pr-5"><em><b>Trello</b></em></span>
+    <button class="btn mr-0 pr-0" id="archive">
+    	<span class="text-white">Archive</span>
+    </button>
+    <span class="navbar-brand trello-header text-white m-auto pl-5 pr-5">
+    	<em>
+    		<b>Trello</b>
+    	</em>
+    </span>
     <div class="nav-item float-right ml-5">
-        <button class="btn ml-5" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board"><span class="text-white" id="add-board"><b>+</b></span></button>
-        <a class="navbar-item text-white" href="{% url 'logout' %}">Logout</a>
+        <button class="btn ml-5" data-toggle="modal" data-target="#modal-id" data-remote="{% url 'create-board' %}" id="create-board">
+        	<span class="text-white pl-1 pr-1" id="add-board"><b>+</b></span>
+        </button>
+        <span class="span-logout">
+        	<a class="navbar-item text-white" href="{% url 'logout' %}">Logout</a>
+        </span>
     </div>
 </nav>
